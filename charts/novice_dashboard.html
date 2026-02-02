@@ -1,0 +1,2708 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дашборд: Novice Division</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .section-title {
+            font-size: 1.8em;
+            color: #333;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-card.leader {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card.follower {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .chart-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chart-container h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.85em;
+        }
+        tbody tr:hover {
+            background: #f5f5f5;
+        }
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        canvas {
+            max-height: 500px;
+        }
+        .chart-container.full-width {
+            min-height: 400px;
+        }
+        .chart-container.full-width canvas {
+            max-height: none;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Дашборд: Novice Division</h1>
+        <p class="subtitle">Анализ дивизиона Novice с разделением по ролям (только < 16 очков)</p>
+        <p class="subtitle">Дата анализа: 29.01.2026 16:51</p>
+        
+        <h2 class="section-title">📈 Общая статистика</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Всего записей</h3>
+                <div class="value">147</div>
+            </div>
+            <div class="stat-card">
+                <h3>Среднее очков</h3>
+                <div class="value">1.78</div>
+            </div>
+            <div class="stat-card">
+                <h3>Медиана</h3>
+                <div class="value">0.0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Максимум</h3>
+                <div class="value">15</div>
+            </div>
+            <div class="stat-card">
+                <h3>С очками</h3>
+                <div class="value">64</div>
+            </div>
+            <div class="stat-card">
+                <h3>С 0 очками</h3>
+                <div class="value">83</div>
+            </div>
+        </div>
+        
+        <h2 class="section-title">👥 Статистика по ролям</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card leader">
+                <h3>Leader: Всего</h3>
+                <div class="value">84</div>
+            </div>
+            <div class="stat-card leader">
+                <h3>Leader: Среднее</h3>
+                <div class="value">1.6</div>
+            </div>
+            <div class="stat-card leader">
+                <h3>Leader: Медиана</h3>
+                <div class="value">0.0</div>
+            </div>
+            <div class="stat-card leader">
+                <h3>Leader: Максимум</h3>
+                <div class="value">13</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Всего</h3>
+                <div class="value">63</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Среднее</h3>
+                <div class="value">2.03</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Медиана</h3>
+                <div class="value">0.0</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Максимум</h3>
+                <div class="value">15</div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h2>Сравнение Leader vs Follower</h2>
+                <canvas id="roleComparison"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Средние очки по ролям</h2>
+                <canvas id="avgByRole"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Распределение по категориям очков</h2>
+                <canvas id="categoryDistribution"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Распределение очков (гистограмма)</h2>
+                <canvas id="pointsHistogram"></canvas>
+            </div>
+        </div>
+        
+        <h2 class="section-title">🏆 Все танцоры Novice (общий список)</h2>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Место</th>
+                        <th>Имя</th>
+                        <th>Роль</th>
+                        <th>Очки</th>
+                        <th>WSDC ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td>1</td>
+                        <td>Просина Светлана</td>
+                        <td>Follower</td>
+                        <td><strong>15</strong></td>
+                        <td>26223</td>
+                    </tr>
+
+                    <tr>
+                        <td>2</td>
+                        <td>Заболотный Сергей</td>
+                        <td>Leader</td>
+                        <td><strong>13</strong></td>
+                        <td>23449</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>Попов Михаил</td>
+                        <td>Leader</td>
+                        <td><strong>13</strong></td>
+                        <td>14824</td>
+                    </tr>
+
+                    <tr>
+                        <td>4</td>
+                        <td>Varya Khavtorina</td>
+                        <td>Follower</td>
+                        <td><strong>13</strong></td>
+                        <td>26057</td>
+                    </tr>
+
+                    <tr>
+                        <td>5</td>
+                        <td>Ушаков Андрей</td>
+                        <td>Leader</td>
+                        <td><strong>12</strong></td>
+                        <td>10757</td>
+                    </tr>
+
+                    <tr>
+                        <td>6</td>
+                        <td>Морозова Дарья</td>
+                        <td>Follower</td>
+                        <td><strong>11</strong></td>
+                        <td>23758</td>
+                    </tr>
+
+                    <tr>
+                        <td>7</td>
+                        <td>Marina Tikhonova</td>
+                        <td>Follower</td>
+                        <td><strong>10</strong></td>
+                        <td>24891</td>
+                    </tr>
+
+                    <tr>
+                        <td>8</td>
+                        <td>Гареев Артур</td>
+                        <td>Leader</td>
+                        <td><strong>9</strong></td>
+                        <td>23444</td>
+                    </tr>
+
+                    <tr>
+                        <td>9</td>
+                        <td>Батталова Тамара</td>
+                        <td>Follower</td>
+                        <td><strong>9</strong></td>
+                        <td>23453</td>
+                    </tr>
+
+                    <tr>
+                        <td>10</td>
+                        <td>Паричук Никита</td>
+                        <td>Leader</td>
+                        <td><strong>9</strong></td>
+                        <td>26219</td>
+                    </tr>
+
+                    <tr>
+                        <td>11</td>
+                        <td>Захаров Дмитрий</td>
+                        <td>Leader</td>
+                        <td><strong>8</strong></td>
+                        <td>26614</td>
+                    </tr>
+
+                    <tr>
+                        <td>12</td>
+                        <td>Холина Валентина</td>
+                        <td>Follower</td>
+                        <td><strong>8</strong></td>
+                        <td>13602</td>
+                    </tr>
+
+                    <tr>
+                        <td>13</td>
+                        <td>Оводов Юрий</td>
+                        <td>Leader</td>
+                        <td><strong>8</strong></td>
+                        <td>23756</td>
+                    </tr>
+
+                    <tr>
+                        <td>14</td>
+                        <td>Качурин Олег</td>
+                        <td>Leader</td>
+                        <td><strong>8</strong></td>
+                        <td>22024</td>
+                    </tr>
+
+                    <tr>
+                        <td>15</td>
+                        <td>Белильщикова Светлана</td>
+                        <td>Follower</td>
+                        <td><strong>8</strong></td>
+                        <td>8937</td>
+                    </tr>
+
+                    <tr>
+                        <td>16</td>
+                        <td>Фомченко Дарья</td>
+                        <td>Follower</td>
+                        <td><strong>8</strong></td>
+                        <td>24712</td>
+                    </tr>
+
+                    <tr>
+                        <td>17</td>
+                        <td>Егерев Максим</td>
+                        <td>Follower</td>
+                        <td><strong>7</strong></td>
+                        <td>20058</td>
+                    </tr>
+
+                    <tr>
+                        <td>18</td>
+                        <td>Лебедев Михаил</td>
+                        <td>Leader</td>
+                        <td><strong>7</strong></td>
+                        <td>20009</td>
+                    </tr>
+
+                    <tr>
+                        <td>19</td>
+                        <td>Мукмензянов Руслан</td>
+                        <td>Leader</td>
+                        <td><strong>6</strong></td>
+                        <td>21218</td>
+                    </tr>
+
+                    <tr>
+                        <td>20</td>
+                        <td>Моргось Никита</td>
+                        <td>Leader</td>
+                        <td><strong>6</strong></td>
+                        <td>22562</td>
+                    </tr>
+
+                    <tr>
+                        <td>21</td>
+                        <td>Лисицына Ольга</td>
+                        <td>Follower</td>
+                        <td><strong>4</strong></td>
+                        <td>25593</td>
+                    </tr>
+
+                    <tr>
+                        <td>22</td>
+                        <td>Гизатуллин Сергей</td>
+                        <td>Leader</td>
+                        <td><strong>4</strong></td>
+                        <td>18043</td>
+                    </tr>
+
+                    <tr>
+                        <td>23</td>
+                        <td>Сафронова Виктория</td>
+                        <td>Follower</td>
+                        <td><strong>3</strong></td>
+                        <td>24163</td>
+                    </tr>
+
+                    <tr>
+                        <td>24</td>
+                        <td>Малоросиянцева Елена</td>
+                        <td>Follower</td>
+                        <td><strong>3</strong></td>
+                        <td>22183</td>
+                    </tr>
+
+                    <tr>
+                        <td>25</td>
+                        <td>Ус Анастасия</td>
+                        <td>Follower</td>
+                        <td><strong>3</strong></td>
+                        <td>16034</td>
+                    </tr>
+
+                    <tr>
+                        <td>26</td>
+                        <td>Бойченко Светлана</td>
+                        <td>Follower</td>
+                        <td><strong>3</strong></td>
+                        <td>22037</td>
+                    </tr>
+
+                    <tr>
+                        <td>27</td>
+                        <td>Сичинская Анна</td>
+                        <td>Follower</td>
+                        <td><strong>3</strong></td>
+                        <td>24164</td>
+                    </tr>
+
+                    <tr>
+                        <td>28</td>
+                        <td>Yevgeniya Akhmadeyeva</td>
+                        <td>Leader</td>
+                        <td><strong>2</strong></td>
+                        <td>17572</td>
+                    </tr>
+
+                    <tr>
+                        <td>29</td>
+                        <td>Yulia Matveeva</td>
+                        <td>Follower</td>
+                        <td><strong>2</strong></td>
+                        <td>17010</td>
+                    </tr>
+
+                    <tr>
+                        <td>30</td>
+                        <td>Гаплевский Дмитрий</td>
+                        <td>Leader</td>
+                        <td><strong>2</strong></td>
+                        <td>16526</td>
+                    </tr>
+
+                    <tr>
+                        <td>31</td>
+                        <td>Гафарова Эльвира</td>
+                        <td>Follower</td>
+                        <td><strong>2</strong></td>
+                        <td>19861</td>
+                    </tr>
+
+                    <tr>
+                        <td>32</td>
+                        <td>Карп Кирилл</td>
+                        <td>Leader</td>
+                        <td><strong>2</strong></td>
+                        <td>19984</td>
+                    </tr>
+
+                    <tr>
+                        <td>33</td>
+                        <td>Anna Vladi</td>
+                        <td>Follower</td>
+                        <td><strong>2</strong></td>
+                        <td>23454</td>
+                    </tr>
+
+                    <tr>
+                        <td>34</td>
+                        <td>Верещагина Вита</td>
+                        <td>Follower</td>
+                        <td><strong>2</strong></td>
+                        <td>18658</td>
+                    </tr>
+
+                    <tr>
+                        <td>35</td>
+                        <td>Maksim Zaychenko</td>
+                        <td>Leader</td>
+                        <td><strong>2</strong></td>
+                        <td>19989</td>
+                    </tr>
+
+                    <tr>
+                        <td>36</td>
+                        <td>Ковалев Глеб</td>
+                        <td>Leader</td>
+                        <td><strong>2</strong></td>
+                        <td>19995</td>
+                    </tr>
+
+                    <tr>
+                        <td>37</td>
+                        <td>Воронова Александра</td>
+                        <td>Leader</td>
+                        <td><strong>2</strong></td>
+                        <td>20008</td>
+                    </tr>
+
+                    <tr>
+                        <td>38</td>
+                        <td>Борискина Ксения</td>
+                        <td>Follower</td>
+                        <td><strong>2</strong></td>
+                        <td>26221</td>
+                    </tr>
+
+                    <tr>
+                        <td>39</td>
+                        <td>Абраженина Алена</td>
+                        <td>Leader</td>
+                        <td><strong>2</strong></td>
+                        <td>22980</td>
+                    </tr>
+
+                    <tr>
+                        <td>40</td>
+                        <td>Герасимов Антон</td>
+                        <td>Leader</td>
+                        <td><strong>2</strong></td>
+                        <td>21378</td>
+                    </tr>
+
+                    <tr>
+                        <td>41</td>
+                        <td>Байчоров Мурат</td>
+                        <td>Leader</td>
+                        <td><strong>2</strong></td>
+                        <td>21215</td>
+                    </tr>
+
+                    <tr>
+                        <td>42</td>
+                        <td>Тарасенко Егор</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>6865</td>
+                    </tr>
+
+                    <tr>
+                        <td>43</td>
+                        <td>Рыбакова Тина</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>8576</td>
+                    </tr>
+
+                    <tr>
+                        <td>44</td>
+                        <td>Морозов Анатолий</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>19988</td>
+                    </tr>
+
+                    <tr>
+                        <td>45</td>
+                        <td>Аслямова Дина</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>11019</td>
+                    </tr>
+
+                    <tr>
+                        <td>46</td>
+                        <td>Ефанова Валерия</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>9108</td>
+                    </tr>
+
+                    <tr>
+                        <td>47</td>
+                        <td>Alyona Kostochkina</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>9890</td>
+                    </tr>
+
+                    <tr>
+                        <td>48</td>
+                        <td>Ахметов Артур</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>23446</td>
+                    </tr>
+
+                    <tr>
+                        <td>49</td>
+                        <td>Тарантина Надежда</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>23840</td>
+                    </tr>
+
+                    <tr>
+                        <td>50</td>
+                        <td>Alexandra Besnard</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>20890</td>
+                    </tr>
+
+                    <tr>
+                        <td>51</td>
+                        <td>Грин Евгения</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>20713</td>
+                    </tr>
+
+                    <tr>
+                        <td>52</td>
+                        <td>Mariya Solonkina</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>25013</td>
+                    </tr>
+
+                    <tr>
+                        <td>53</td>
+                        <td>Polina Danshina</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>23842</td>
+                    </tr>
+
+                    <tr>
+                        <td>54</td>
+                        <td>Вахненко Марина</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>23846</td>
+                    </tr>
+
+                    <tr>
+                        <td>55</td>
+                        <td>Авдеев Максим</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>24161</td>
+                    </tr>
+
+                    <tr>
+                        <td>56</td>
+                        <td>Епифанцев Сергей</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>23779</td>
+                    </tr>
+
+                    <tr>
+                        <td>57</td>
+                        <td>Степанов Роман</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>23448</td>
+                    </tr>
+
+                    <tr>
+                        <td>58</td>
+                        <td>Якубова Кристина</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>26218</td>
+                    </tr>
+
+                    <tr>
+                        <td>59</td>
+                        <td>Заболотная Ольга</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>25022</td>
+                    </tr>
+
+                    <tr>
+                        <td>60</td>
+                        <td>Konstantin Chaikun</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>26615</td>
+                    </tr>
+
+                    <tr>
+                        <td>61</td>
+                        <td>Yevgeniy Perfilyev</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>26617</td>
+                    </tr>
+
+                    <tr>
+                        <td>62</td>
+                        <td>Апетян Арине</td>
+                        <td>Follower</td>
+                        <td><strong>1</strong></td>
+                        <td>27219</td>
+                    </tr>
+
+                    <tr>
+                        <td>63</td>
+                        <td>Канев Дмитрий</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>27228</td>
+                    </tr>
+
+                    <tr>
+                        <td>64</td>
+                        <td>Попов Андрей</td>
+                        <td>Leader</td>
+                        <td><strong>1</strong></td>
+                        <td>27229</td>
+                    </tr>
+
+                    <tr>
+                        <td>65</td>
+                        <td>Баяндина Елена</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>10754</td>
+                    </tr>
+
+                    <tr>
+                        <td>66</td>
+                        <td>Иванченко Андрей</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>11014</td>
+                    </tr>
+
+                    <tr>
+                        <td>67</td>
+                        <td>Родионов Игорь</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>11327</td>
+                    </tr>
+
+                    <tr>
+                        <td>68</td>
+                        <td>Горбанев Максим</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>11557</td>
+                    </tr>
+
+                    <tr>
+                        <td>69</td>
+                        <td>Мороко Василий</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>12115</td>
+                    </tr>
+
+                    <tr>
+                        <td>70</td>
+                        <td>Малов Сергей</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>12327</td>
+                    </tr>
+
+                    <tr>
+                        <td>71</td>
+                        <td>Никишин Павел</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>12331</td>
+                    </tr>
+
+                    <tr>
+                        <td>72</td>
+                        <td>Любомирский Юрий</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>12439</td>
+                    </tr>
+
+                    <tr>
+                        <td>73</td>
+                        <td>Петрушева Наталья</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>15116</td>
+                    </tr>
+
+                    <tr>
+                        <td>74</td>
+                        <td>Курников Вадим</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>15117</td>
+                    </tr>
+
+                    <tr>
+                        <td>75</td>
+                        <td>Амельченко Людмила</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>16629</td>
+                    </tr>
+
+                    <tr>
+                        <td>76</td>
+                        <td>Феофилатова Ольга</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>17338</td>
+                    </tr>
+
+                    <tr>
+                        <td>77</td>
+                        <td>Рыбаков Артем</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>18109</td>
+                    </tr>
+
+                    <tr>
+                        <td>78</td>
+                        <td>Вихлянцев Александр</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>19235</td>
+                    </tr>
+
+                    <tr>
+                        <td>79</td>
+                        <td>Зарубин Алексей</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>19237</td>
+                    </tr>
+
+                    <tr>
+                        <td>80</td>
+                        <td>Бондаренко Мария</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>19250</td>
+                    </tr>
+
+                    <tr>
+                        <td>81</td>
+                        <td>Махиуддин Ренат</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>19709</td>
+                    </tr>
+
+                    <tr>
+                        <td>82</td>
+                        <td>Смирнов Павел</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>21307</td>
+                    </tr>
+
+                    <tr>
+                        <td>83</td>
+                        <td>Nadezhda Isaenko</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>21901</td>
+                    </tr>
+
+                    <tr>
+                        <td>84</td>
+                        <td>Пронина Гульнара</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>21956</td>
+                    </tr>
+
+                    <tr>
+                        <td>85</td>
+                        <td>Kamil Sagidoullin</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>21957</td>
+                    </tr>
+
+                    <tr>
+                        <td>86</td>
+                        <td>Май Инесса</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>21963</td>
+                    </tr>
+
+                    <tr>
+                        <td>87</td>
+                        <td>Голиков Евгений</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>22025</td>
+                    </tr>
+
+                    <tr>
+                        <td>88</td>
+                        <td>Валиахметов Павел</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>22026</td>
+                    </tr>
+
+                    <tr>
+                        <td>89</td>
+                        <td>Вальяхметова Злата</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>22030</td>
+                    </tr>
+
+                    <tr>
+                        <td>90</td>
+                        <td>Покидаев Константин</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>22563</td>
+                    </tr>
+
+                    <tr>
+                        <td>91</td>
+                        <td>Бугаев Сергей</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>22564</td>
+                    </tr>
+
+                    <tr>
+                        <td>92</td>
+                        <td>Larisa Yurlova</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>22566</td>
+                    </tr>
+
+                    <tr>
+                        <td>93</td>
+                        <td>Svetlana Mulitsa</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>22984</td>
+                    </tr>
+
+                    <tr>
+                        <td>94</td>
+                        <td>Кондрусева Лариса</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>22985</td>
+                    </tr>
+
+                    <tr>
+                        <td>95</td>
+                        <td>Десяткин Денис</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>23438</td>
+                    </tr>
+
+                    <tr>
+                        <td>96</td>
+                        <td>Фролов Дмитрий</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>23439</td>
+                    </tr>
+
+                    <tr>
+                        <td>97</td>
+                        <td>Аликина Дарья</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>23441</td>
+                    </tr>
+
+                    <tr>
+                        <td>98</td>
+                        <td>Сагидуллин Камиль</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>23736</td>
+                    </tr>
+
+                    <tr>
+                        <td>99</td>
+                        <td>Кокшарова Анастасия</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>23780</td>
+                    </tr>
+
+                    <tr>
+                        <td>100</td>
+                        <td>Ветчинова Наталья</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>23782</td>
+                    </tr>
+
+                    <tr>
+                        <td>101</td>
+                        <td>Anastasiya Nesmelova</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>23784</td>
+                    </tr>
+
+                    <tr>
+                        <td>102</td>
+                        <td>Anastasiya Nesmelova</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>23784</td>
+                    </tr>
+
+                    <tr>
+                        <td>103</td>
+                        <td>Dmitrii Damulin</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>23836</td>
+                    </tr>
+
+                    <tr>
+                        <td>104</td>
+                        <td>Волкова Юлия</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>23841</td>
+                    </tr>
+
+                    <tr>
+                        <td>105</td>
+                        <td>Мокрунов Сергей</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>24152</td>
+                    </tr>
+
+                    <tr>
+                        <td>106</td>
+                        <td>Протасов Владимир</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>24695</td>
+                    </tr>
+
+                    <tr>
+                        <td>107</td>
+                        <td>Некрасов Иван</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>24697</td>
+                    </tr>
+
+                    <tr>
+                        <td>108</td>
+                        <td>Кучин Виталий</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>24698</td>
+                    </tr>
+
+                    <tr>
+                        <td>109</td>
+                        <td>Vera Brovkina</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>24699</td>
+                    </tr>
+
+                    <tr>
+                        <td>110</td>
+                        <td>Бураменская Яна</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>24701</td>
+                    </tr>
+
+                    <tr>
+                        <td>111</td>
+                        <td>Волкова Наталья</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>24702</td>
+                    </tr>
+
+                    <tr>
+                        <td>112</td>
+                        <td>Anastasiia Us</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>24704</td>
+                    </tr>
+
+                    <tr>
+                        <td>113</td>
+                        <td>Anastasiia Us</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>24704</td>
+                    </tr>
+
+                    <tr>
+                        <td>114</td>
+                        <td>Tatyana Yeybozhenko</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>24706</td>
+                    </tr>
+
+                    <tr>
+                        <td>115</td>
+                        <td>Лазарев Роман</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25000</td>
+                    </tr>
+
+                    <tr>
+                        <td>116</td>
+                        <td>Лозовой Вячеслав</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25001</td>
+                    </tr>
+
+                    <tr>
+                        <td>117</td>
+                        <td>Andrei Ivanchenko</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25002</td>
+                    </tr>
+
+                    <tr>
+                        <td>118</td>
+                        <td>Лозунова Алиса</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25003</td>
+                    </tr>
+
+                    <tr>
+                        <td>119</td>
+                        <td>Лопашов Семен</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25004</td>
+                    </tr>
+
+                    <tr>
+                        <td>120</td>
+                        <td>Сутковой Владимир</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25005</td>
+                    </tr>
+
+                    <tr>
+                        <td>121</td>
+                        <td>Неоменко Николай</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25006</td>
+                    </tr>
+
+                    <tr>
+                        <td>122</td>
+                        <td>Кошелева Екатерина</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25007</td>
+                    </tr>
+
+                    <tr>
+                        <td>123</td>
+                        <td>Dariya Bisovko</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>25012</td>
+                    </tr>
+
+                    <tr>
+                        <td>124</td>
+                        <td>Ilona Bozhe</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>25018</td>
+                    </tr>
+
+                    <tr>
+                        <td>125</td>
+                        <td>Aleksei Iakshin</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25407</td>
+                    </tr>
+
+                    <tr>
+                        <td>126</td>
+                        <td>Кокорев Олег</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>25616</td>
+                    </tr>
+
+                    <tr>
+                        <td>127</td>
+                        <td>Динов Радик</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>26051</td>
+                    </tr>
+
+                    <tr>
+                        <td>128</td>
+                        <td>Irina Tuchinskaya</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>26053</td>
+                    </tr>
+
+                    <tr>
+                        <td>129</td>
+                        <td>Natalya Stelmakh</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>26124</td>
+                    </tr>
+
+                    <tr>
+                        <td>130</td>
+                        <td>Dmitriy Bursh</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>26198</td>
+                    </tr>
+
+                    <tr>
+                        <td>131</td>
+                        <td>Звягинцева Лариса</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>26199</td>
+                    </tr>
+
+                    <tr>
+                        <td>132</td>
+                        <td>Баскаков Даниил</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>26202</td>
+                    </tr>
+
+                    <tr>
+                        <td>133</td>
+                        <td>Кузнецов Михаил</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>26204</td>
+                    </tr>
+
+                    <tr>
+                        <td>134</td>
+                        <td>Коржов Вячеслав</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>26206</td>
+                    </tr>
+
+                    <tr>
+                        <td>135</td>
+                        <td>Харитонов Александр</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>26207</td>
+                    </tr>
+
+                    <tr>
+                        <td>136</td>
+                        <td>Клейменова Александра</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>26208</td>
+                    </tr>
+
+                    <tr>
+                        <td>137</td>
+                        <td>Anastasiya Osminina</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>26210</td>
+                    </tr>
+
+                    <tr>
+                        <td>138</td>
+                        <td>Taisiya Afanasyeva</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>26213</td>
+                    </tr>
+
+                    <tr>
+                        <td>139</td>
+                        <td>Aleksandr Timonin</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>26587</td>
+                    </tr>
+
+                    <tr>
+                        <td>140</td>
+                        <td>Tatyana Parfenova</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>26589</td>
+                    </tr>
+
+                    <tr>
+                        <td>141</td>
+                        <td>Колякина Екатерина</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>26590</td>
+                    </tr>
+
+                    <tr>
+                        <td>142</td>
+                        <td>Травкин Владимир</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>27116</td>
+                    </tr>
+
+                    <tr>
+                        <td>143</td>
+                        <td>Olga Uskova</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>27121</td>
+                    </tr>
+
+                    <tr>
+                        <td>144</td>
+                        <td>Павлов Алексей</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>27122</td>
+                    </tr>
+
+                    <tr>
+                        <td>145</td>
+                        <td>Захаров Игорь</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>27223</td>
+                    </tr>
+
+                    <tr>
+                        <td>146</td>
+                        <td>Никитин Сергей</td>
+                        <td>Leader</td>
+                        <td><strong>0</strong></td>
+                        <td>27224</td>
+                    </tr>
+
+                    <tr>
+                        <td>147</td>
+                        <td>Комарова Ольга</td>
+                        <td>Follower</td>
+                        <td><strong>0</strong></td>
+                        <td>27225</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+        
+        <h2 class="section-title">🥇 Все Leader ({len(all_leader)} танцоров)</h2>
+        
+        <div class="chart-container full-width">
+            <canvas id="allLeader"></canvas>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Место</th>
+                        <th>Имя</th>
+                        <th>Очки</th>
+                        <th>WSDC ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td>1</td>
+                        <td>Заболотный Сергей</td>
+                        <td><strong>13</strong></td>
+                        <td>23449</td>
+                    </tr>
+
+                    <tr>
+                        <td>2</td>
+                        <td>Попов Михаил</td>
+                        <td><strong>13</strong></td>
+                        <td>14824</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>Ушаков Андрей</td>
+                        <td><strong>12</strong></td>
+                        <td>10757</td>
+                    </tr>
+
+                    <tr>
+                        <td>4</td>
+                        <td>Гареев Артур</td>
+                        <td><strong>9</strong></td>
+                        <td>23444</td>
+                    </tr>
+
+                    <tr>
+                        <td>5</td>
+                        <td>Паричук Никита</td>
+                        <td><strong>9</strong></td>
+                        <td>26219</td>
+                    </tr>
+
+                    <tr>
+                        <td>6</td>
+                        <td>Захаров Дмитрий</td>
+                        <td><strong>8</strong></td>
+                        <td>26614</td>
+                    </tr>
+
+                    <tr>
+                        <td>7</td>
+                        <td>Оводов Юрий</td>
+                        <td><strong>8</strong></td>
+                        <td>23756</td>
+                    </tr>
+
+                    <tr>
+                        <td>8</td>
+                        <td>Качурин Олег</td>
+                        <td><strong>8</strong></td>
+                        <td>22024</td>
+                    </tr>
+
+                    <tr>
+                        <td>9</td>
+                        <td>Лебедев Михаил</td>
+                        <td><strong>7</strong></td>
+                        <td>20009</td>
+                    </tr>
+
+                    <tr>
+                        <td>10</td>
+                        <td>Мукмензянов Руслан</td>
+                        <td><strong>6</strong></td>
+                        <td>21218</td>
+                    </tr>
+
+                    <tr>
+                        <td>11</td>
+                        <td>Моргось Никита</td>
+                        <td><strong>6</strong></td>
+                        <td>22562</td>
+                    </tr>
+
+                    <tr>
+                        <td>12</td>
+                        <td>Гизатуллин Сергей</td>
+                        <td><strong>4</strong></td>
+                        <td>18043</td>
+                    </tr>
+
+                    <tr>
+                        <td>13</td>
+                        <td>Yevgeniya Akhmadeyeva</td>
+                        <td><strong>2</strong></td>
+                        <td>17572</td>
+                    </tr>
+
+                    <tr>
+                        <td>14</td>
+                        <td>Гаплевский Дмитрий</td>
+                        <td><strong>2</strong></td>
+                        <td>16526</td>
+                    </tr>
+
+                    <tr>
+                        <td>15</td>
+                        <td>Карп Кирилл</td>
+                        <td><strong>2</strong></td>
+                        <td>19984</td>
+                    </tr>
+
+                    <tr>
+                        <td>16</td>
+                        <td>Maksim Zaychenko</td>
+                        <td><strong>2</strong></td>
+                        <td>19989</td>
+                    </tr>
+
+                    <tr>
+                        <td>17</td>
+                        <td>Ковалев Глеб</td>
+                        <td><strong>2</strong></td>
+                        <td>19995</td>
+                    </tr>
+
+                    <tr>
+                        <td>18</td>
+                        <td>Воронова Александра</td>
+                        <td><strong>2</strong></td>
+                        <td>20008</td>
+                    </tr>
+
+                    <tr>
+                        <td>19</td>
+                        <td>Абраженина Алена</td>
+                        <td><strong>2</strong></td>
+                        <td>22980</td>
+                    </tr>
+
+                    <tr>
+                        <td>20</td>
+                        <td>Герасимов Антон</td>
+                        <td><strong>2</strong></td>
+                        <td>21378</td>
+                    </tr>
+
+                    <tr>
+                        <td>21</td>
+                        <td>Байчоров Мурат</td>
+                        <td><strong>2</strong></td>
+                        <td>21215</td>
+                    </tr>
+
+                    <tr>
+                        <td>22</td>
+                        <td>Тарасенко Егор</td>
+                        <td><strong>1</strong></td>
+                        <td>6865</td>
+                    </tr>
+
+                    <tr>
+                        <td>23</td>
+                        <td>Морозов Анатолий</td>
+                        <td><strong>1</strong></td>
+                        <td>19988</td>
+                    </tr>
+
+                    <tr>
+                        <td>24</td>
+                        <td>Аслямова Дина</td>
+                        <td><strong>1</strong></td>
+                        <td>11019</td>
+                    </tr>
+
+                    <tr>
+                        <td>25</td>
+                        <td>Ахметов Артур</td>
+                        <td><strong>1</strong></td>
+                        <td>23446</td>
+                    </tr>
+
+                    <tr>
+                        <td>26</td>
+                        <td>Грин Евгения</td>
+                        <td><strong>1</strong></td>
+                        <td>20713</td>
+                    </tr>
+
+                    <tr>
+                        <td>27</td>
+                        <td>Авдеев Максим</td>
+                        <td><strong>1</strong></td>
+                        <td>24161</td>
+                    </tr>
+
+                    <tr>
+                        <td>28</td>
+                        <td>Епифанцев Сергей</td>
+                        <td><strong>1</strong></td>
+                        <td>23779</td>
+                    </tr>
+
+                    <tr>
+                        <td>29</td>
+                        <td>Степанов Роман</td>
+                        <td><strong>1</strong></td>
+                        <td>23448</td>
+                    </tr>
+
+                    <tr>
+                        <td>30</td>
+                        <td>Якубова Кристина</td>
+                        <td><strong>1</strong></td>
+                        <td>26218</td>
+                    </tr>
+
+                    <tr>
+                        <td>31</td>
+                        <td>Konstantin Chaikun</td>
+                        <td><strong>1</strong></td>
+                        <td>26615</td>
+                    </tr>
+
+                    <tr>
+                        <td>32</td>
+                        <td>Yevgeniy Perfilyev</td>
+                        <td><strong>1</strong></td>
+                        <td>26617</td>
+                    </tr>
+
+                    <tr>
+                        <td>33</td>
+                        <td>Канев Дмитрий</td>
+                        <td><strong>1</strong></td>
+                        <td>27228</td>
+                    </tr>
+
+                    <tr>
+                        <td>34</td>
+                        <td>Попов Андрей</td>
+                        <td><strong>1</strong></td>
+                        <td>27229</td>
+                    </tr>
+
+                    <tr>
+                        <td>35</td>
+                        <td>Иванченко Андрей</td>
+                        <td><strong>0</strong></td>
+                        <td>11014</td>
+                    </tr>
+
+                    <tr>
+                        <td>36</td>
+                        <td>Родионов Игорь</td>
+                        <td><strong>0</strong></td>
+                        <td>11327</td>
+                    </tr>
+
+                    <tr>
+                        <td>37</td>
+                        <td>Горбанев Максим</td>
+                        <td><strong>0</strong></td>
+                        <td>11557</td>
+                    </tr>
+
+                    <tr>
+                        <td>38</td>
+                        <td>Мороко Василий</td>
+                        <td><strong>0</strong></td>
+                        <td>12115</td>
+                    </tr>
+
+                    <tr>
+                        <td>39</td>
+                        <td>Малов Сергей</td>
+                        <td><strong>0</strong></td>
+                        <td>12327</td>
+                    </tr>
+
+                    <tr>
+                        <td>40</td>
+                        <td>Никишин Павел</td>
+                        <td><strong>0</strong></td>
+                        <td>12331</td>
+                    </tr>
+
+                    <tr>
+                        <td>41</td>
+                        <td>Любомирский Юрий</td>
+                        <td><strong>0</strong></td>
+                        <td>12439</td>
+                    </tr>
+
+                    <tr>
+                        <td>42</td>
+                        <td>Курников Вадим</td>
+                        <td><strong>0</strong></td>
+                        <td>15117</td>
+                    </tr>
+
+                    <tr>
+                        <td>43</td>
+                        <td>Рыбаков Артем</td>
+                        <td><strong>0</strong></td>
+                        <td>18109</td>
+                    </tr>
+
+                    <tr>
+                        <td>44</td>
+                        <td>Вихлянцев Александр</td>
+                        <td><strong>0</strong></td>
+                        <td>19235</td>
+                    </tr>
+
+                    <tr>
+                        <td>45</td>
+                        <td>Зарубин Алексей</td>
+                        <td><strong>0</strong></td>
+                        <td>19237</td>
+                    </tr>
+
+                    <tr>
+                        <td>46</td>
+                        <td>Бондаренко Мария</td>
+                        <td><strong>0</strong></td>
+                        <td>19250</td>
+                    </tr>
+
+                    <tr>
+                        <td>47</td>
+                        <td>Смирнов Павел</td>
+                        <td><strong>0</strong></td>
+                        <td>21307</td>
+                    </tr>
+
+                    <tr>
+                        <td>48</td>
+                        <td>Пронина Гульнара</td>
+                        <td><strong>0</strong></td>
+                        <td>21956</td>
+                    </tr>
+
+                    <tr>
+                        <td>49</td>
+                        <td>Kamil Sagidoullin</td>
+                        <td><strong>0</strong></td>
+                        <td>21957</td>
+                    </tr>
+
+                    <tr>
+                        <td>50</td>
+                        <td>Голиков Евгений</td>
+                        <td><strong>0</strong></td>
+                        <td>22025</td>
+                    </tr>
+
+                    <tr>
+                        <td>51</td>
+                        <td>Валиахметов Павел</td>
+                        <td><strong>0</strong></td>
+                        <td>22026</td>
+                    </tr>
+
+                    <tr>
+                        <td>52</td>
+                        <td>Покидаев Константин</td>
+                        <td><strong>0</strong></td>
+                        <td>22563</td>
+                    </tr>
+
+                    <tr>
+                        <td>53</td>
+                        <td>Бугаев Сергей</td>
+                        <td><strong>0</strong></td>
+                        <td>22564</td>
+                    </tr>
+
+                    <tr>
+                        <td>54</td>
+                        <td>Десяткин Денис</td>
+                        <td><strong>0</strong></td>
+                        <td>23438</td>
+                    </tr>
+
+                    <tr>
+                        <td>55</td>
+                        <td>Фролов Дмитрий</td>
+                        <td><strong>0</strong></td>
+                        <td>23439</td>
+                    </tr>
+
+                    <tr>
+                        <td>56</td>
+                        <td>Сагидуллин Камиль</td>
+                        <td><strong>0</strong></td>
+                        <td>23736</td>
+                    </tr>
+
+                    <tr>
+                        <td>57</td>
+                        <td>Anastasiya Nesmelova</td>
+                        <td><strong>0</strong></td>
+                        <td>23784</td>
+                    </tr>
+
+                    <tr>
+                        <td>58</td>
+                        <td>Dmitrii Damulin</td>
+                        <td><strong>0</strong></td>
+                        <td>23836</td>
+                    </tr>
+
+                    <tr>
+                        <td>59</td>
+                        <td>Мокрунов Сергей</td>
+                        <td><strong>0</strong></td>
+                        <td>24152</td>
+                    </tr>
+
+                    <tr>
+                        <td>60</td>
+                        <td>Протасов Владимир</td>
+                        <td><strong>0</strong></td>
+                        <td>24695</td>
+                    </tr>
+
+                    <tr>
+                        <td>61</td>
+                        <td>Некрасов Иван</td>
+                        <td><strong>0</strong></td>
+                        <td>24697</td>
+                    </tr>
+
+                    <tr>
+                        <td>62</td>
+                        <td>Кучин Виталий</td>
+                        <td><strong>0</strong></td>
+                        <td>24698</td>
+                    </tr>
+
+                    <tr>
+                        <td>63</td>
+                        <td>Anastasiia Us</td>
+                        <td><strong>0</strong></td>
+                        <td>24704</td>
+                    </tr>
+
+                    <tr>
+                        <td>64</td>
+                        <td>Лазарев Роман</td>
+                        <td><strong>0</strong></td>
+                        <td>25000</td>
+                    </tr>
+
+                    <tr>
+                        <td>65</td>
+                        <td>Лозовой Вячеслав</td>
+                        <td><strong>0</strong></td>
+                        <td>25001</td>
+                    </tr>
+
+                    <tr>
+                        <td>66</td>
+                        <td>Andrei Ivanchenko</td>
+                        <td><strong>0</strong></td>
+                        <td>25002</td>
+                    </tr>
+
+                    <tr>
+                        <td>67</td>
+                        <td>Лозунова Алиса</td>
+                        <td><strong>0</strong></td>
+                        <td>25003</td>
+                    </tr>
+
+                    <tr>
+                        <td>68</td>
+                        <td>Лопашов Семен</td>
+                        <td><strong>0</strong></td>
+                        <td>25004</td>
+                    </tr>
+
+                    <tr>
+                        <td>69</td>
+                        <td>Сутковой Владимир</td>
+                        <td><strong>0</strong></td>
+                        <td>25005</td>
+                    </tr>
+
+                    <tr>
+                        <td>70</td>
+                        <td>Неоменко Николай</td>
+                        <td><strong>0</strong></td>
+                        <td>25006</td>
+                    </tr>
+
+                    <tr>
+                        <td>71</td>
+                        <td>Кошелева Екатерина</td>
+                        <td><strong>0</strong></td>
+                        <td>25007</td>
+                    </tr>
+
+                    <tr>
+                        <td>72</td>
+                        <td>Aleksei Iakshin</td>
+                        <td><strong>0</strong></td>
+                        <td>25407</td>
+                    </tr>
+
+                    <tr>
+                        <td>73</td>
+                        <td>Кокорев Олег</td>
+                        <td><strong>0</strong></td>
+                        <td>25616</td>
+                    </tr>
+
+                    <tr>
+                        <td>74</td>
+                        <td>Динов Радик</td>
+                        <td><strong>0</strong></td>
+                        <td>26051</td>
+                    </tr>
+
+                    <tr>
+                        <td>75</td>
+                        <td>Dmitriy Bursh</td>
+                        <td><strong>0</strong></td>
+                        <td>26198</td>
+                    </tr>
+
+                    <tr>
+                        <td>76</td>
+                        <td>Звягинцева Лариса</td>
+                        <td><strong>0</strong></td>
+                        <td>26199</td>
+                    </tr>
+
+                    <tr>
+                        <td>77</td>
+                        <td>Баскаков Даниил</td>
+                        <td><strong>0</strong></td>
+                        <td>26202</td>
+                    </tr>
+
+                    <tr>
+                        <td>78</td>
+                        <td>Кузнецов Михаил</td>
+                        <td><strong>0</strong></td>
+                        <td>26204</td>
+                    </tr>
+
+                    <tr>
+                        <td>79</td>
+                        <td>Коржов Вячеслав</td>
+                        <td><strong>0</strong></td>
+                        <td>26206</td>
+                    </tr>
+
+                    <tr>
+                        <td>80</td>
+                        <td>Харитонов Александр</td>
+                        <td><strong>0</strong></td>
+                        <td>26207</td>
+                    </tr>
+
+                    <tr>
+                        <td>81</td>
+                        <td>Aleksandr Timonin</td>
+                        <td><strong>0</strong></td>
+                        <td>26587</td>
+                    </tr>
+
+                    <tr>
+                        <td>82</td>
+                        <td>Травкин Владимир</td>
+                        <td><strong>0</strong></td>
+                        <td>27116</td>
+                    </tr>
+
+                    <tr>
+                        <td>83</td>
+                        <td>Захаров Игорь</td>
+                        <td><strong>0</strong></td>
+                        <td>27223</td>
+                    </tr>
+
+                    <tr>
+                        <td>84</td>
+                        <td>Никитин Сергей</td>
+                        <td><strong>0</strong></td>
+                        <td>27224</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+        
+        <h2 class="section-title">🥈 Все Follower ({len(all_follower)} танцоров)</h2>
+        
+        <div class="chart-container full-width">
+            <canvas id="allFollower"></canvas>
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Место</th>
+                        <th>Имя</th>
+                        <th>Очки</th>
+                        <th>WSDC ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td>1</td>
+                        <td>Просина Светлана</td>
+                        <td><strong>15</strong></td>
+                        <td>26223</td>
+                    </tr>
+
+                    <tr>
+                        <td>2</td>
+                        <td>Varya Khavtorina</td>
+                        <td><strong>13</strong></td>
+                        <td>26057</td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td>Морозова Дарья</td>
+                        <td><strong>11</strong></td>
+                        <td>23758</td>
+                    </tr>
+
+                    <tr>
+                        <td>4</td>
+                        <td>Marina Tikhonova</td>
+                        <td><strong>10</strong></td>
+                        <td>24891</td>
+                    </tr>
+
+                    <tr>
+                        <td>5</td>
+                        <td>Батталова Тамара</td>
+                        <td><strong>9</strong></td>
+                        <td>23453</td>
+                    </tr>
+
+                    <tr>
+                        <td>6</td>
+                        <td>Холина Валентина</td>
+                        <td><strong>8</strong></td>
+                        <td>13602</td>
+                    </tr>
+
+                    <tr>
+                        <td>7</td>
+                        <td>Белильщикова Светлана</td>
+                        <td><strong>8</strong></td>
+                        <td>8937</td>
+                    </tr>
+
+                    <tr>
+                        <td>8</td>
+                        <td>Фомченко Дарья</td>
+                        <td><strong>8</strong></td>
+                        <td>24712</td>
+                    </tr>
+
+                    <tr>
+                        <td>9</td>
+                        <td>Егерев Максим</td>
+                        <td><strong>7</strong></td>
+                        <td>20058</td>
+                    </tr>
+
+                    <tr>
+                        <td>10</td>
+                        <td>Лисицына Ольга</td>
+                        <td><strong>4</strong></td>
+                        <td>25593</td>
+                    </tr>
+
+                    <tr>
+                        <td>11</td>
+                        <td>Сафронова Виктория</td>
+                        <td><strong>3</strong></td>
+                        <td>24163</td>
+                    </tr>
+
+                    <tr>
+                        <td>12</td>
+                        <td>Малоросиянцева Елена</td>
+                        <td><strong>3</strong></td>
+                        <td>22183</td>
+                    </tr>
+
+                    <tr>
+                        <td>13</td>
+                        <td>Ус Анастасия</td>
+                        <td><strong>3</strong></td>
+                        <td>16034</td>
+                    </tr>
+
+                    <tr>
+                        <td>14</td>
+                        <td>Бойченко Светлана</td>
+                        <td><strong>3</strong></td>
+                        <td>22037</td>
+                    </tr>
+
+                    <tr>
+                        <td>15</td>
+                        <td>Сичинская Анна</td>
+                        <td><strong>3</strong></td>
+                        <td>24164</td>
+                    </tr>
+
+                    <tr>
+                        <td>16</td>
+                        <td>Yulia Matveeva</td>
+                        <td><strong>2</strong></td>
+                        <td>17010</td>
+                    </tr>
+
+                    <tr>
+                        <td>17</td>
+                        <td>Гафарова Эльвира</td>
+                        <td><strong>2</strong></td>
+                        <td>19861</td>
+                    </tr>
+
+                    <tr>
+                        <td>18</td>
+                        <td>Anna Vladi</td>
+                        <td><strong>2</strong></td>
+                        <td>23454</td>
+                    </tr>
+
+                    <tr>
+                        <td>19</td>
+                        <td>Верещагина Вита</td>
+                        <td><strong>2</strong></td>
+                        <td>18658</td>
+                    </tr>
+
+                    <tr>
+                        <td>20</td>
+                        <td>Борискина Ксения</td>
+                        <td><strong>2</strong></td>
+                        <td>26221</td>
+                    </tr>
+
+                    <tr>
+                        <td>21</td>
+                        <td>Рыбакова Тина</td>
+                        <td><strong>1</strong></td>
+                        <td>8576</td>
+                    </tr>
+
+                    <tr>
+                        <td>22</td>
+                        <td>Ефанова Валерия</td>
+                        <td><strong>1</strong></td>
+                        <td>9108</td>
+                    </tr>
+
+                    <tr>
+                        <td>23</td>
+                        <td>Alyona Kostochkina</td>
+                        <td><strong>1</strong></td>
+                        <td>9890</td>
+                    </tr>
+
+                    <tr>
+                        <td>24</td>
+                        <td>Тарантина Надежда</td>
+                        <td><strong>1</strong></td>
+                        <td>23840</td>
+                    </tr>
+
+                    <tr>
+                        <td>25</td>
+                        <td>Alexandra Besnard</td>
+                        <td><strong>1</strong></td>
+                        <td>20890</td>
+                    </tr>
+
+                    <tr>
+                        <td>26</td>
+                        <td>Mariya Solonkina</td>
+                        <td><strong>1</strong></td>
+                        <td>25013</td>
+                    </tr>
+
+                    <tr>
+                        <td>27</td>
+                        <td>Polina Danshina</td>
+                        <td><strong>1</strong></td>
+                        <td>23842</td>
+                    </tr>
+
+                    <tr>
+                        <td>28</td>
+                        <td>Вахненко Марина</td>
+                        <td><strong>1</strong></td>
+                        <td>23846</td>
+                    </tr>
+
+                    <tr>
+                        <td>29</td>
+                        <td>Заболотная Ольга</td>
+                        <td><strong>1</strong></td>
+                        <td>25022</td>
+                    </tr>
+
+                    <tr>
+                        <td>30</td>
+                        <td>Апетян Арине</td>
+                        <td><strong>1</strong></td>
+                        <td>27219</td>
+                    </tr>
+
+                    <tr>
+                        <td>31</td>
+                        <td>Баяндина Елена</td>
+                        <td><strong>0</strong></td>
+                        <td>10754</td>
+                    </tr>
+
+                    <tr>
+                        <td>32</td>
+                        <td>Петрушева Наталья</td>
+                        <td><strong>0</strong></td>
+                        <td>15116</td>
+                    </tr>
+
+                    <tr>
+                        <td>33</td>
+                        <td>Амельченко Людмила</td>
+                        <td><strong>0</strong></td>
+                        <td>16629</td>
+                    </tr>
+
+                    <tr>
+                        <td>34</td>
+                        <td>Феофилатова Ольга</td>
+                        <td><strong>0</strong></td>
+                        <td>17338</td>
+                    </tr>
+
+                    <tr>
+                        <td>35</td>
+                        <td>Махиуддин Ренат</td>
+                        <td><strong>0</strong></td>
+                        <td>19709</td>
+                    </tr>
+
+                    <tr>
+                        <td>36</td>
+                        <td>Nadezhda Isaenko</td>
+                        <td><strong>0</strong></td>
+                        <td>21901</td>
+                    </tr>
+
+                    <tr>
+                        <td>37</td>
+                        <td>Май Инесса</td>
+                        <td><strong>0</strong></td>
+                        <td>21963</td>
+                    </tr>
+
+                    <tr>
+                        <td>38</td>
+                        <td>Вальяхметова Злата</td>
+                        <td><strong>0</strong></td>
+                        <td>22030</td>
+                    </tr>
+
+                    <tr>
+                        <td>39</td>
+                        <td>Larisa Yurlova</td>
+                        <td><strong>0</strong></td>
+                        <td>22566</td>
+                    </tr>
+
+                    <tr>
+                        <td>40</td>
+                        <td>Svetlana Mulitsa</td>
+                        <td><strong>0</strong></td>
+                        <td>22984</td>
+                    </tr>
+
+                    <tr>
+                        <td>41</td>
+                        <td>Кондрусева Лариса</td>
+                        <td><strong>0</strong></td>
+                        <td>22985</td>
+                    </tr>
+
+                    <tr>
+                        <td>42</td>
+                        <td>Аликина Дарья</td>
+                        <td><strong>0</strong></td>
+                        <td>23441</td>
+                    </tr>
+
+                    <tr>
+                        <td>43</td>
+                        <td>Кокшарова Анастасия</td>
+                        <td><strong>0</strong></td>
+                        <td>23780</td>
+                    </tr>
+
+                    <tr>
+                        <td>44</td>
+                        <td>Ветчинова Наталья</td>
+                        <td><strong>0</strong></td>
+                        <td>23782</td>
+                    </tr>
+
+                    <tr>
+                        <td>45</td>
+                        <td>Anastasiya Nesmelova</td>
+                        <td><strong>0</strong></td>
+                        <td>23784</td>
+                    </tr>
+
+                    <tr>
+                        <td>46</td>
+                        <td>Волкова Юлия</td>
+                        <td><strong>0</strong></td>
+                        <td>23841</td>
+                    </tr>
+
+                    <tr>
+                        <td>47</td>
+                        <td>Vera Brovkina</td>
+                        <td><strong>0</strong></td>
+                        <td>24699</td>
+                    </tr>
+
+                    <tr>
+                        <td>48</td>
+                        <td>Бураменская Яна</td>
+                        <td><strong>0</strong></td>
+                        <td>24701</td>
+                    </tr>
+
+                    <tr>
+                        <td>49</td>
+                        <td>Волкова Наталья</td>
+                        <td><strong>0</strong></td>
+                        <td>24702</td>
+                    </tr>
+
+                    <tr>
+                        <td>50</td>
+                        <td>Anastasiia Us</td>
+                        <td><strong>0</strong></td>
+                        <td>24704</td>
+                    </tr>
+
+                    <tr>
+                        <td>51</td>
+                        <td>Tatyana Yeybozhenko</td>
+                        <td><strong>0</strong></td>
+                        <td>24706</td>
+                    </tr>
+
+                    <tr>
+                        <td>52</td>
+                        <td>Dariya Bisovko</td>
+                        <td><strong>0</strong></td>
+                        <td>25012</td>
+                    </tr>
+
+                    <tr>
+                        <td>53</td>
+                        <td>Ilona Bozhe</td>
+                        <td><strong>0</strong></td>
+                        <td>25018</td>
+                    </tr>
+
+                    <tr>
+                        <td>54</td>
+                        <td>Irina Tuchinskaya</td>
+                        <td><strong>0</strong></td>
+                        <td>26053</td>
+                    </tr>
+
+                    <tr>
+                        <td>55</td>
+                        <td>Natalya Stelmakh</td>
+                        <td><strong>0</strong></td>
+                        <td>26124</td>
+                    </tr>
+
+                    <tr>
+                        <td>56</td>
+                        <td>Клейменова Александра</td>
+                        <td><strong>0</strong></td>
+                        <td>26208</td>
+                    </tr>
+
+                    <tr>
+                        <td>57</td>
+                        <td>Anastasiya Osminina</td>
+                        <td><strong>0</strong></td>
+                        <td>26210</td>
+                    </tr>
+
+                    <tr>
+                        <td>58</td>
+                        <td>Taisiya Afanasyeva</td>
+                        <td><strong>0</strong></td>
+                        <td>26213</td>
+                    </tr>
+
+                    <tr>
+                        <td>59</td>
+                        <td>Tatyana Parfenova</td>
+                        <td><strong>0</strong></td>
+                        <td>26589</td>
+                    </tr>
+
+                    <tr>
+                        <td>60</td>
+                        <td>Колякина Екатерина</td>
+                        <td><strong>0</strong></td>
+                        <td>26590</td>
+                    </tr>
+
+                    <tr>
+                        <td>61</td>
+                        <td>Olga Uskova</td>
+                        <td><strong>0</strong></td>
+                        <td>27121</td>
+                    </tr>
+
+                    <tr>
+                        <td>62</td>
+                        <td>Павлов Алексей</td>
+                        <td><strong>0</strong></td>
+                        <td>27122</td>
+                    </tr>
+
+                    <tr>
+                        <td>63</td>
+                        <td>Комарова Ольга</td>
+                        <td><strong>0</strong></td>
+                        <td>27225</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Сравнение ролей
+        const roleCompCtx = document.getElementById('roleComparison').getContext('2d');
+        new Chart(roleCompCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Leader', 'Follower'],
+                datasets: [{
+                    data: [84, 63],
+                    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+        
+        // Средние очки по ролям
+        const avgRoleCtx = document.getElementById('avgByRole').getContext('2d');
+        new Chart(avgRoleCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Leader', 'Follower'],
+                datasets: [{
+                    label: 'Среднее очков',
+                    data: [1.6, 2.03],
+                    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Среднее очков' }
+                    }
+                }
+            }
+        });
+        
+        // Распределение по категориям
+        const catDistCtx = document.getElementById('categoryDistribution').getContext('2d');
+        new Chart(catDistCtx, {
+            type: 'bar',
+            data: {
+                labels: ["0 очков", "1-5", "6-10", "11-15", "16-20", "21-25", "26-30", "> 30"],
+                datasets: [{
+                    label: 'Количество',
+                    data: [83, 44, 14, 6, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Количество танцоров' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Диапазон очков' }
+                    }
+                }
+            }
+        });
+        
+        // Гистограмма распределения очков
+        const histCtx = document.getElementById('pointsHistogram').getContext('2d');
+        const histData = [15, 13, 13, 13, 12, 11, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 6, 6, 4, 4, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        new Chart(histCtx, {
+            type: 'bar',
+            data: {
+                labels: Array.from({length: Math.max(...histData) + 1}, (_, i) => i),
+                datasets: [{
+                    label: 'Количество танцоров',
+                    data: histData.reduce((acc, val) => {
+                        acc[val] = (acc[val] || 0) + 1;
+                        return acc;
+                    }, []),
+                    backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Количество' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Очки' }
+                    }
+                }
+            }
+        });
+        
+        // Все Leader
+        const allLeaderCtx = document.getElementById('allLeader').getContext('2d');
+        new Chart(allLeaderCtx, {
+            type: 'bar',
+            data: {
+                labels: ["Заболотный Сергей", "Попов Михаил", "Ушаков Андрей", "Гареев Артур", "Паричук Никита", "Захаров Дмитрий", "Оводов Юрий", "Качурин Олег", "Лебедев Михаил", "Мукмензянов Руслан", "Моргось Никита", "Гизатуллин Сергей", "Yevgeniya Akhmadeyeva", "Гаплевский Дмитрий", "Карп Кирилл", "Maksim Zaychenko", "Ковалев Глеб", "Воронова Александра", "Абраженина Алена", "Герасимов Антон", "Байчоров Мурат", "Тарасенко Егор", "Морозов Анатолий", "Аслямова Дина", "Ахметов Артур", "Грин Евгения", "Авдеев Максим", "Епифанцев Сергей", "Степанов Роман", "Якубова Кристина", "Konstantin Chaikun", "Yevgeniy Perfilyev", "Канев Дмитрий", "Попов Андрей", "Иванченко Андрей", "Родионов Игорь", "Горбанев Максим", "Мороко Василий", "Малов Сергей", "Никишин Павел", "Любомирский Юрий", "Курников Вадим", "Рыбаков Артем", "Вихлянцев Александр", "Зарубин Алексей", "Бондаренко Мария", "Смирнов Павел", "Пронина Гульнара", "Kamil Sagidoullin", "Голиков Евгений", "Валиахметов Павел", "Покидаев Константин", "Бугаев Сергей", "Десяткин Денис", "Фролов Дмитрий", "Сагидуллин Камиль", "Anastasiya Nesmelova", "Dmitrii Damulin", "Мокрунов Сергей", "Протасов Владимир", "Некрасов Иван", "Кучин Виталий", "Anastasiia Us", "Лазарев Роман", "Лозовой Вячеслав", "Andrei Ivanchenko", "Лозунова Алиса", "Лопашов Семен", "Сутковой Владимир", "Неоменко Николай", "Кошелева Екатерина", "Aleksei Iakshin", "Кокорев Олег", "Динов Радик", "Dmitriy Bursh", "Звягинцева Лариса", "Баскаков Даниил", "Кузнецов Михаил", "Коржов Вячеслав", "Харитонов Александр", "Aleksandr Timonin", "Травкин Владимир", "Захаров Игорь", "Никитин Сергей"],
+                datasets: [{
+                    label: 'Очки',
+                    data: [13, 13, 12, 9, 9, 8, 8, 8, 7, 6, 6, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Очки' }
+                    },
+                    y: {
+                        ticks: {
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: false,
+                            font: {
+                                size: 11
+                            }
+                        },
+                        afterFit: function(scale) {
+                            scale.width = Math.max(scale.width, 200);
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+        
+        // Все Follower
+        const allFollowerCtx = document.getElementById('allFollower').getContext('2d');
+        new Chart(allFollowerCtx, {
+            type: 'bar',
+            data: {
+                labels: ["Просина Светлана", "Varya Khavtorina", "Морозова Дарья", "Marina Tikhonova", "Батталова Тамара", "Холина Валентина", "Белильщикова Светлана", "Фомченко Дарья", "Егерев Максим", "Лисицына Ольга", "Сафронова Виктория", "Малоросиянцева Елена", "Ус Анастасия", "Бойченко Светлана", "Сичинская Анна", "Yulia Matveeva", "Гафарова Эльвира", "Anna Vladi", "Верещагина Вита", "Борискина Ксения", "Рыбакова Тина", "Ефанова Валерия", "Alyona Kostochkina", "Тарантина Надежда", "Alexandra Besnard", "Mariya Solonkina", "Polina Danshina", "Вахненко Марина", "Заболотная Ольга", "Апетян Арине", "Баяндина Елена", "Петрушева Наталья", "Амельченко Людмила", "Феофилатова Ольга", "Махиуддин Ренат", "Nadezhda Isaenko", "Май Инесса", "Вальяхметова Злата", "Larisa Yurlova", "Svetlana Mulitsa", "Кондрусева Лариса", "Аликина Дарья", "Кокшарова Анастасия", "Ветчинова Наталья", "Anastasiya Nesmelova", "Волкова Юлия", "Vera Brovkina", "Бураменская Яна", "Волкова Наталья", "Anastasiia Us", "Tatyana Yeybozhenko", "Dariya Bisovko", "Ilona Bozhe", "Irina Tuchinskaya", "Natalya Stelmakh", "Клейменова Александра", "Anastasiya Osminina", "Taisiya Afanasyeva", "Tatyana Parfenova", "Колякина Екатерина", "Olga Uskova", "Павлов Алексей", "Комарова Ольга"],
+                datasets: [{
+                    label: 'Очки',
+                    data: [15, 13, 11, 10, 9, 8, 8, 8, 7, 4, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Очки' }
+                    },
+                    y: {
+                        ticks: {
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: false,
+                            font: {
+                                size: 11
+                            }
+                        },
+                        afterFit: function(scale) {
+                            scale.width = Math.max(scale.width, 200);
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

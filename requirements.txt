@@ -1,0 +1,11 @@
+streamlit>=1.28.0
+pandas>=2.0.0
+plotly>=5.18.0
+gspread>=5.12.0
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+openpyxl>=3.1.2
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+pypdf>=4.0.0
+requests-html>=0.10.0  # Опционально, для JS-рендеринга

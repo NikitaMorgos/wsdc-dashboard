@@ -1,0 +1,427 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расширенный анализ: Novice & Newcomer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .section-title {
+            font-size: 1.8em;
+            color: #333;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-card.leader {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card.follower {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .chart-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chart-container h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        canvas {
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Расширенный анализ: Novice & Newcomer</h1>
+        <p class="subtitle">Анализ по ролям (Leader/Follower) | Танцоры с < 16 очков в Novice | Все с очками в Newcomer</p>
+        <p class="subtitle">Дата анализа: 29.01.2026 16:31</p>
+        
+        <h2 class="section-title">📈 Novice Division (< 16 очков)</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card leader">
+                <h3>Leader: Всего</h3>
+                <div class="value">35</div>
+            </div>
+            <div class="stat-card leader">
+                <h3>Leader: Среднее</h3>
+                <div class="value">4.26</div>
+            </div>
+            <div class="stat-card leader">
+                <h3>Leader: Медиана</h3>
+                <div class="value">2.0</div>
+            </div>
+            <div class="stat-card leader">
+                <h3>Leader: Максимум</h3>
+                <div class="value">15</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Всего</h3>
+                <div class="value">30</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Среднее</h3>
+                <div class="value">4.27</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Медиана</h3>
+                <div class="value">2.5</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Максимум</h3>
+                <div class="value">15</div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h2>Сравнение Leader vs Follower (Novice)</h2>
+                <canvas id="roleComparisonNovice"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Распределение очков по ролям (Novice)</h2>
+                <canvas id="distributionByRoleNovice"></canvas>
+            </div>
+            
+            <div class="chart-container full-width">
+                <h2>Топ-15 Leader (Novice)</h2>
+                <canvas id="top15LeaderNovice"></canvas>
+            </div>
+            
+            <div class="chart-container full-width">
+                <h2>Топ-15 Follower (Novice)</h2>
+                <canvas id="top15FollowerNovice"></canvas>
+            </div>
+        </div>
+        
+        <h2 class="section-title">🌟 Newcomer Division</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card leader">
+                <h3>Leader: Всего</h3>
+                <div class="value">76</div>
+            </div>
+            <div class="stat-card leader">
+                <h3>Leader: Среднее</h3>
+                <div class="value">2.88</div>
+            </div>
+            <div class="stat-card leader">
+                <h3>Leader: Медиана</h3>
+                <div class="value">2.0</div>
+            </div>
+            <div class="stat-card leader">
+                <h3>Leader: Максимум</h3>
+                <div class="value">11</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Всего</h3>
+                <div class="value">49</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Среднее</h3>
+                <div class="value">3.02</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Медиана</h3>
+                <div class="value">2.0</div>
+            </div>
+            <div class="stat-card follower">
+                <h3>Follower: Максимум</h3>
+                <div class="value">10</div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h2>Сравнение Leader vs Follower (Newcomer)</h2>
+                <canvas id="roleComparisonNewcomer"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Распределение очков по ролям (Newcomer)</h2>
+                <canvas id="distributionByRoleNewcomer"></canvas>
+            </div>
+            
+            <div class="chart-container full-width"><h2>Топ-15 Leader (Newcomer)</h2><canvas id="top15LeaderNewcomer"></canvas></div>
+            <div class="chart-container full-width"><h2>Топ-15 Follower (Newcomer)</h2><canvas id="top15FollowerNewcomer"></canvas></div>
+        </div>
+    </div>
+    
+    <script>
+        // Сравнение ролей в Novice
+        const roleCompNoviceCtx = document.getElementById('roleComparisonNovice').getContext('2d');
+        new Chart(roleCompNoviceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Leader', 'Follower'],
+                datasets: [{
+                    data: [35, 30],
+                    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+        
+        // Распределение по ролям в Novice
+        const distRoleNoviceCtx = document.getElementById('distributionByRoleNovice').getContext('2d');
+        new Chart(distRoleNoviceCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Leader', 'Follower'],
+                datasets: [{
+                    label: 'Среднее очков',
+                    data: [4.26, 4.27],
+                    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Среднее очков' }
+                    }
+                }
+            }
+        });
+        
+        // Топ-15 Leader Novice
+        const top15LeaderNoviceCtx = document.getElementById('top15LeaderNovice').getContext('2d');
+        new Chart(top15LeaderNoviceCtx, {
+            type: 'bar',
+            data: {
+                labels: ["Шаповалов Артем", "Попов Михаил", "Заболотный Сергей", "Ушаков Андрей", "Гареев Артур", "Паричук Никита", "Качурин Олег", "Оводов Юрий", "Захаров Дмитрий", "Лебедев Михаил", "Мукмензянов Руслан", "Моргось Никита", "Гизатуллин Сергей", "Гаплевский Дмитрий", "Yevgeniya Akhmadeyeva"],
+                datasets: [{
+                    label: 'Очки',
+                    data: [15, 13, 13, 12, 9, 9, 8, 8, 8, 7, 6, 6, 4, 2, 2],
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Очки' }
+                    }
+                }
+            }
+        });
+        
+        // Топ-15 Follower Novice
+        const top15FollowerNoviceCtx = document.getElementById('top15FollowerNovice').getContext('2d');
+        new Chart(top15FollowerNoviceCtx, {
+            type: 'bar',
+            data: {
+                labels: ["Просина Светлана", "Varya Khavtorina", "Морозова Дарья", "Marina Tikhonova", "Батталова Тамара", "Белильщикова Светлана", "Холина Валентина", "Фомченко Дарья", "Егерев Максим", "Лисицына Ольга", "Ус Анастасия", "Бойченко Светлана", "Малоросиянцева Елена", "Сафронова Виктория", "Сичинская Анна"],
+                datasets: [{
+                    label: 'Очки',
+                    data: [15, 13, 11, 10, 9, 8, 8, 8, 7, 4, 3, 3, 3, 3, 3],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Очки' }
+                    }
+                }
+            }
+        });
+        
+        // Сравнение ролей в Newcomer
+        const roleCompNewcomerCtx = document.getElementById('roleComparisonNewcomer').getContext('2d');
+        new Chart(roleCompNewcomerCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Leader', 'Follower'],
+                datasets: [{
+                    data: [76, 49],
+                    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+        
+        // Распределение по ролям в Newcomer
+        const distRoleNewcomerCtx = document.getElementById('distributionByRoleNewcomer').getContext('2d');
+        new Chart(distRoleNewcomerCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Leader', 'Follower'],
+                datasets: [{
+                    label: 'Среднее очков',
+                    data: [2.88, 3.02],
+                    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Среднее очков' }
+                    }
+                }
+            }
+        });
+        
+        
+        // Топ-15 Leader Newcomer
+        const top15LeaderNewcomerCtx = document.getElementById('top15LeaderNewcomer').getContext('2d');
+        new Chart(top15LeaderNewcomerCtx, {
+            type: 'bar',
+            data: {
+                labels: ["Ушаков Андрей", "Dmitriy Bursh", "Alexandra Besnard", "Лазарев Роман", "Звягинцева Лариса", "Смолин Сергей", "Холина Валентина", "Шаповалов Артем", "Anastasiya Sineva", "Лозовой Вячеслав", "Александров Сергей", "Чайкун Константин", "Любомирский Юрий", "Гумеров Данис", "Курников Вадим"],
+                datasets: [{
+                    label: 'Очки',
+                    data: [11, 10, 8, 8, 8, 6, 6, 6, 6, 6, 5, 5, 5, 4, 4],
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Очки' }
+                    }
+                }
+            }
+        });
+        
+        
+        
+        // Топ-15 Follower Newcomer
+        const top15FollowerNewcomerCtx = document.getElementById('top15FollowerNewcomer').getContext('2d');
+        new Chart(top15FollowerNewcomerCtx, {
+            type: 'bar',
+            data: {
+                labels: ["Nadezhda Isaenko", "Черных Матвей", "Vera Brovkina", "Клейменова Александра", "Холина Валентина", "Петрушева Наталья", "Кокшарова Анастасия", "Бураменская Яна", "Anastasiya Osminina", "Баяндина Елена", "Тарантина Надежда", "Волкова Наталья", "Dariya Bisovko", "Белильщикова Светлана", "Амельченко Людмила"],
+                datasets: [{
+                    label: 'Очки',
+                    data: [10, 10, 10, 10, 8, 6, 6, 6, 6, 4, 4, 4, 4, 3, 3],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Очки' }
+                    }
+                }
+            }
+        });
+        
+    </script>
+</body>
+</html>

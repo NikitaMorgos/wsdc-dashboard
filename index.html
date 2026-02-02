@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WSDC Points — Дашборды</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        .header h1 { font-size: 2.2em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .header p { font-size: 1.1em; opacity: 0.95; }
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        }
+        .card a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        .card a:hover { text-decoration: underline; }
+        .card p { color: #555; margin-top: 8px; font-size: 0.95em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WSDC Points — Дашборды</h1>
+            <p>Интерактивные отчёты по очкам WSDC</p>
+        </div>
+        <div class="card">
+            <a href="novice_closing_speed_dashboard.html">Скорость закрытия Novice</a>
+            <p>Анализ времени закрытия новисов по месяцам, по ролям и топы быстрых/медленных закрытий.</p>
+        </div>
+        <div class="card">
+            <a href="novice_rating_dashboard.html">Рейтинг Novice</a>
+            <p>Рейтинг новисов по очкам (лидеры и фолловеры, до 16 очков).</p>
+        </div>
+        <div class="card">
+            <a href="charts/novice_dashboard.html">Novice — общий дашборд</a>
+            <p>Дашборд по новисам (charts).</p>
+        </div>
+        <div class="card">
+            <a href="charts/novice_leader_dashboard.html">Novice Leaders</a>
+            <p>Дашборд по лидерам Novice.</p>
+        </div>
+        <div class="card">
+            <a href="charts/advanced_analysis_dashboard.html">Расширенный анализ</a>
+            <p>Расширенная аналитика.</p>
+        </div>
+    </div>
+</body>
+</html>

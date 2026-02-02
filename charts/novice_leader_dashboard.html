@@ -1,0 +1,289 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализ Novice Leader</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .chart-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chart-container h2 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        canvas {
+            max-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Анализ Novice Leader</h1>
+        <p class="subtitle">Дата анализа: 29.01.2026 16:02</p>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Всего танцоров</h3>
+                <div class="value">86</div>
+            </div>
+            <div class="stat-card">
+                <h3>Среднее очков</h3>
+                <div class="value">14.37</div>
+            </div>
+            <div class="stat-card">
+                <h3>Медиана</h3>
+                <div class="value">17.0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Максимум</h3>
+                <div class="value">33</div>
+            </div>
+            <div class="stat-card">
+                <h3>Novice (&lt; 16)</h3>
+                <div class="value">35</div>
+            </div>
+            <div class="stat-card">
+                <h3>Allowed (16-30)</h3>
+                <div class="value">50</div>
+            </div>
+            <div class="stat-card">
+                <h3>Advanced (&gt; 30)</h3>
+                <div class="value">1</div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h2>📈 Распределение очков</h2>
+                <canvas id="histogramChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>🥇 Топ-20 танцоров</h2>
+                <canvas id="top20Chart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>📊 Распределение по категориям</h2>
+                <canvas id="pieChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>📉 Столбчатая диаграмма категорий</h2>
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Гистограмма
+        const histCtx = document.getElementById('histogramChart').getContext('2d');
+        new Chart(histCtx, {
+            type: 'bar',
+            data: {
+                labels: ["0-2", "2-3", "3-4", "4-5", "5-6", "6-7", "7-8", "8-9", "9-10", "10-11", "11-12", "12-13", "13-14", "14-15", "15-17", "17-18", "18-19", "19-20", "20-21", "21-22"],
+                datasets: [{
+                    label: 'Количество танцоров',
+                    data: [22, 0, 1, 0, 2, 1, 3, 2, 0, 0, 1, 2, 0, 1, 11, 5, 4, 6, 2, 4],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Количество' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Диапазон очков' },
+                        ticks: { maxRotation: 45, minRotation: 45 }
+                    }
+                }
+            }
+        });
+        
+        // Топ-20
+        const top20Ctx = document.getElementById('top20Chart').getContext('2d');
+        new Chart(top20Ctx, {
+            type: 'bar',
+            data: {
+                labels: ["Маннанов Эмиль", "Елагин Роман", "Шуфер Михаил", "Борисов Клим", "Волков Вячеслав", "Суслов Алексей", "Новосельцев Владимир", "Салин Константин", "Миронова Наталья", "Касаткин Виктор", "Бойкова Татьяна", "Фабрицкий Олег", "Кочев Алексей", "Майборода Федор", "Сизов Борис", "Данилова Анна", "Колонистов Виталий", "Наволоцкий Андрей", "Яцковский Максим", "Смолин Сергей"],
+                datasets: [{
+                    label: 'Очки',
+                    data: [33, 30, 29, 29, 28, 27, 26, 26, 25, 25, 24, 24, 24, 24, 23, 23, 23, 23, 23, 22],
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Очки' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Танцор' }
+                    }
+                }
+            }
+        });
+        
+        // Круговая диаграмма
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ["Allowed (16-30)", "Novice (< 16)", "Advanced (> 30)"],
+                datasets: [{
+                    data: [50, 35, 1],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: { display: false }
+                }
+            }
+        });
+        
+        // Столбчатая диаграмма категорий
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ["Allowed (16-30)", "Novice (< 16)", "Advanced (> 30)"],
+                datasets: [{
+                    label: 'Количество танцоров',
+                    data: [50, 35, 1],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Количество танцоров' }
+                    },
+                    x: {
+                        title: { display: true, text: 'Категория' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

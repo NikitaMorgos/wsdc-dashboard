@@ -1,0 +1,119 @@
+Novice JnJ - Prelims - Leaders
+Shooba Dooba Swing
+GA Gulnara Arkhipova
+MF Maksim Feoktistov
+LP Pavel Levchenko
+YB Yevgeniy Borisov
+Score legend: 10 = YES, 4.x = ALT, 0 = NO; WSDC prelim ranking by sum
+# Name GA MF LP YB Sum Result
+106 Dmitriy Bursh 10 10 10 10 40 Callback
+108 Nikita Morgos 10 10 10 10 40 Callback
+116 Anton Matveev 10 10 10 10 40 Callback
+167 Alena Ivanova 10 10 10 10 40 Callback
+186 Yuriy Ovodov 10 10 10 10 40 Callback
+211 Tatyana Boykova 10 10 10 10 40 Callback
+216 Nikita Parichuk 10 10 10 10 40 Callback
+219 Polina Khapaeva 10 10 10 10 40 Callback
+220 Andrey Popov 10 10 10 10 40 Callback
+252 Konstantin Chaikun 10 10 10 10 40 Callback
+266 Dmitriy Kanev 10 10 10 10 40 Callback
+276 Renat Makhiuddin 10 10 10 10 40 Callback
+288 Andrey Ushakov 10 10 10 10 40 Callback
+300 Anton Sochnev 10 10 10 10 40 Callback
+136 Sergey Mokrunov 10 10 10 4.5 34.5 Callback
+272 Yevgeniy Perfilyev 10 10 4.5 10 34.5 Callback
+166 Dmitriy Zakharov 10 10 4.3 10 34.3 Callback
+120 Ekaterina Kosheleva 0 10 10 10 30 Callback
+187 Yevgeniya Akhmadeyeva 0 10 10 10 30 Callback
+226 Ruslan Mukmenzyanov 10 10 10 0 30 Callback
+270 Roman Stepanov 10 10 0 10 30 Callback
+304 Sergey Gizatullin 10 10 10 0 30 Callback
+312 Aleksey Pavlov 10 10 0 10 30 Callback
+363 Anastasiya Sineva 0 10 10 10 30 Callback
+385 Natallia Mironova 0 10 10 10 30 Callback
+124 Alexander Isaev 4.5 10 10 0 24.5 Callback
+110 Yevgeniy Golikov 10 4.3 10 0 24.3 Callback
+156 Ilya Chulkov 4.2 10 0 10 24.2 Callback
+316 Mikhail Lebedev 10 10 0 4.2 24.2 Callback
+126 Alena Abrazhenina 0 0 10 10 20 Callback
+128 Daniil Ievlev 10 0 0 10 20 Alt 1
+134 Andrei Ivanchenko 10 0 0 10 20 Alt 2
+144 Maksim Dashko 10 0 0 10 20 Alt 3
+132 Dmitrii Damulin 10 0 4.2 4.3 18.5 -
+142 Aleksandr Timonin 10 4.5 0 0 14.5 -
+391 Anastasiya Kobyakova 0 4.2 10 0 14.2 -
+150 Yuri Lubomirski 0 0 0 10 10 -
+176 Aleksandr Kharitonov 0 0 10 0 10 -
+234 Maksim Zaychenko 0 0 10 0 10 -
+324 Sergey Dyachenko 0 0 10 0 10 -
+170 Denis Yudayev 4.3 0 0 0 4.3 -
+146 Aleksei Iakshin 0 0 0 0 0 -
+232 Alyona Kostochkina 0 0 0 0 0 -
+296 Vsevolod Serebrianyi 0 0 0 0 0 -
+Novice JnJ - Prelims - Followers
+Shooba Dooba Swing
+EGr Ekaterina Grigorieva
+AI Anastasiya Ivanova
+VL Vladimir Leonov
+OM Olga Malafeyevskaya
+SM Svetlana Moskaleva
+Score legend: 10 = YES, 4.x = ALT, 0 = NO; WSDC prelim ranking by sum
+# Name EGr AI VL OM SM Sum Result
+129 Marina Girina 10 10 10 10 10 50 Callback
+139 Marina Tikhonova 10 10 10 10 10 50 Callback
+149 Ellina Kalinina 10 10 10 10 10 50 Callback
+157 Lyubov Berdnikova 10 10 10 10 10 50 Callback
+183 Maria Chicheleva 10 10 10 10 10 50 Callback
+209 Yelena Malorosiyantseva 10 10 10 10 10 50 Callback
+285 Elvira Gafarova 10 10 10 10 10 50 Callback
+365 Olga Lisitsyna 10 10 10 10 10 50 Callback
+401 Svetlana Prosina 10 10 10 10 10 50 Callback
+145 Darya Fomchenko 10 10 10 10 0 40 Callback
+213 Varvara Poltinina 10 10 10 10 0 40 Callback
+253 Svetlana Tuktarova 10 10 10 10 0 40 Callback
+313 Olga Yushkantseva 10 10 0 10 10 40 Callback
+389 Alina Yafasova 10 10 10 0 10 40 Callback
+327 Yana Grebennikova 10 10 4.5 10 0 34.5 Callback
+201 Dariya Bisovko 10 0 4.3 10 10 34.3 Callback
+267 Varya Khavtorina 0 10 10 10 4.3 34.3 Callback
+289 Anastasiya Karlitskaya 10 4.2 10 0 10 34.2 Callback
+331 Anna Vladi 4.2 10 10 10 0 34.2 Callback
+359 Mariya Solonkina 10 10 0 10 4.2 34.2 Callback
+112 Roman Yelagin 10 0 10 10 0 30 Callback
+171 Valeriya Efanova 0 10 10 0 10 30 Callback
+175 Ilona Bozhe 0 0 10 10 10 30 Callback
+193 Svetlana Budzinskaya 10 0 10 10 0 30 Callback
+205 Anastasiia Us 10 10 0 10 0 30 Callback
+261 Polina Danshina 10 0 0 10 10 30 Callback
+291 Svetlana Mulitsa 10 10 0 10 0 30 Callback
+305 Svetlana Boychenko 10 10 0 0 10 30 Callback
+307 Anna Ubaseva 10 10 10 0 0 30 Callback
+303 Svetlana Aleksandrova 0 0 10 10 4.5 24.5 Callback(*)
+237 Tatyana Yeybozhenko 4.5 0 10 0 10 24.5 Alt 1
+151 Anna Sichinskaya 0 10 10 4.5 0 24.5 Alt 2(*)
+387 Marina Suslova 10 10 4.2 0 0 24.2 Alt 3(*)
+133 Alexandra Kleymenova 10 0 10 0 0 20 -
+143 Anna Shesterikova 0 10 0 10 0 20 -
+165 Victoria Safronova 0 10 0 0 10 20 -
+207 Larisa Kondruseva 0 0 0 10 10 20 -
+230 Nadezhda Isaenko 0 10 0 0 10 20 -
+241 Alena Dobromyslova 10 0 10 0 0 20 -
+215 Nadezhda Tarantina 0 4.5 10 0 0 14.5 -
+125 Elena Lebedeva 0 0 0 4.3 10 14.3 -
+123 Irina Tuchinskaya 0 0 0 0 10 10 -
+163 Galka Glazkova 0 0 0 10 0 10 -
+195 Anna Volodina 0 0 0 0 10 10 -
+199 Anastasiya Osminina 0 0 0 0 10 10 -
+225 Natalya Stelmakh 0 0 0 0 10 10 -
+315 Yana Buramenskaya 0 0 0 0 10 10 -
+317 Yuliya Volkova 0 0 10 0 0 10 -
+325 Yuliya Guryanova 0 0 0 0 10 10 -
+141 Natalya Volkova 4.3 0 0 0 0 4.3 -
+210 Denis Gorbanyov 0 4.3 0 0 0 4.3 -
+319 Kristina Istomina 0 0 0 4.2 0 4.2 -
+147 Olga Uskova 0 0 0 0 0 0 -
+169 Lara Yakovleva 0 0 0 0 0 0 -
+229 Anastasiya Nesmelova 0 0 0 0 0 0 -
+263 Taisiya Afanasyeva 0 0 0 0 0 0 -
+349 Larisa Yurlova 0 0 0 0 0 0 -
+357 Tatyana Parfenova 0 0 0 0 0 0 -
