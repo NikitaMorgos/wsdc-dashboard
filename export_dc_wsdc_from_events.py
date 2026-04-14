@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Выгрузка танцоров с WSDC номерами из финальных результатов danceConvention.net
-по списку ивентов (final-round-results).
+Выгрузка танцоров с WSDC номерами из результатов danceConvention.net:
+  - финальные раунды (final-round-results) — для всех ивентов
+  - prelim/semi раунды (prelim-round-results) — если доступны (HTTP 200)
 
 Учётные данные:
   set DC_EMAIL=...
@@ -53,6 +54,14 @@ def login(session: requests.Session, email: str, password: str) -> None:
     session.cookies.set("DCNET_SESSION", sid, domain="danceconvention.net")
 
 
+def get_json_or_none(session: requests.Session, path: str):
+    """Returns (data, status_code). data=None if non-200."""
+    r = session.get(f"{BASE}{path}", timeout=60)
+    if r.status_code == 200:
+        return r.json(), 200
+    return None, r.status_code
+
+
 def get_json(session: requests.Session, path: str) -> Any:
     r = session.get(f"{BASE}{path}", timeout=60)
     if r.status_code == 401:
@@ -67,6 +76,28 @@ def fetch_event_competitions(session: requests.Session, event_id: int) -> Dict[s
 
 def fetch_final_results(session: requests.Session, contest_id: int) -> Dict[str, Any]:
     return get_json(session, f"/v2/results/final-round-results/{contest_id}")
+
+
+def parse_results(results: List[Dict], tag: str, event_id: int, event_name: str,
+                  cid: Any, cname: str, round_type: str) -> List[Dict[str, Any]]:
+    rows = []
+    for line in results:
+        rows.append({
+            "event_tag":        tag,
+            "event_id":         event_id,
+            "event_name":       event_name,
+            "contest_id":       cid,
+            "contest_name":     cname,
+            "round_type":       round_type,
+            "rank":             line.get("rank"),
+            "bib_number":       line.get("bibNumber"),
+            "competitor_role":  line.get("competitorRole"),
+            "competitor_name":  line.get("competitorName"),
+            "partner_name":     line.get("partnerName"),
+            "affiliation_type": line.get("affiliationType"),
+            "wsdc_id":          line.get("affiliationNumber"),
+        })
+    return rows
 
 
 def main() -> int:
@@ -106,6 +137,9 @@ def main() -> int:
         event_name = ev_info.get("name") or str(event_id)
         comps = ev.get("competitions") or []
 
+        final_cnt = 0
+        prelim_cnt = 0
+
         for c in comps:
             if c.get("affiliationType") != "WSDC":
                 continue
@@ -113,37 +147,38 @@ def main() -> int:
             cname = c.get("name") or ""
             if cid is None:
                 continue
+
+            # ── Finals ──────────────────────────────────────────────────────
             try:
                 fr = fetch_final_results(session, int(cid))
+                results = fr.get("results") or []
+                rows.extend(parse_results(results, tag, event_id, event_name,
+                                          cid, cname, "FINAL"))
+                final_cnt += len(results)
             except Exception as e:
-                print(
-                    f"[skip] final {tag} contest={cname} id={cid}: {e}",
-                    file=sys.stderr,
-                )
-                time.sleep(0.2)
-                continue
-
-            results = fr.get("results") or []
-            for line in results:
-                rows.append(
-                    {
-                        "event_tag": tag,
-                        "event_id": event_id,
-                        "event_name": event_name,
-                        "contest_id": cid,
-                        "contest_name": cname,
-                        "rank": line.get("rank"),
-                        "bib_number": line.get("bibNumber"),
-                        "competitor_role": line.get("competitorRole"),
-                        "competitor_name": line.get("competitorName"),
-                        "partner_name": line.get("partnerName"),
-                        "affiliation_type": line.get("affiliationType"),
-                        "wsdc_id": line.get("affiliationNumber"),
-                    }
-                )
+                print(f"[skip] final {tag} contest={cname} id={cid}: {e}", file=sys.stderr)
             time.sleep(0.15)
 
-        print(f"OK {tag} ({event_name}): competitions WSDC processed", file=sys.stderr)
+            # ── Prelim / Semi — try every roundId; skip if 403/404 ─────────
+            rounds = c.get("rounds") or []
+            for i, rnd in enumerate(rounds):
+                rid = rnd.get("roundId")
+                if not rid:
+                    continue
+                data, status = get_json_or_none(
+                    session, f"/v2/results/prelim-round-results/{rid}"
+                )
+                if data:
+                    results_p = data.get("results") or []
+                    rows.extend(parse_results(results_p, tag, event_id, event_name,
+                                              cid, cname, f"PRELIM_{i+1}"))
+                    prelim_cnt += len(results_p)
+                time.sleep(0.12)
+
+        print(
+            f"OK {tag} ({event_name}): finals={final_cnt} prelims/semis={prelim_cnt}",
+            file=sys.stderr,
+        )
 
     if not rows:
         print("No rows — check event IDs or login.", file=sys.stderr)
