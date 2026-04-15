@@ -44,6 +44,8 @@ THRESHOLDS: Dict[str, Optional[int]] = {
 DIVISION_ORDER = ["Newcomer", "Novice", "Intermediate", "Advanced",
                   "All-Stars", "Sophisticated", "Masters"]
 
+DIVISION_INDEX = {d: i for i, d in enumerate(DIVISION_ORDER)}
+
 DIVISION_COLORS = {
     "Newcomer":     "#06b6d4",
     "Novice":       "#4361ee",
@@ -110,6 +112,33 @@ def load_divisions(path: str) -> List[Dict]:
                 "speed":     speed,
             })
     return rows
+
+
+def keep_only_highest_division_per_dancer(div_rows: List[Dict]) -> List[Dict]:
+    """
+    Один танцор на роль — только строка из самого старшего дивизиона в реестре
+    (нет дублей в Novice/Intermediate, если уже есть All-Stars и т.д.).
+    """
+    groups: Dict[Tuple[str, str], List[Dict]] = defaultdict(list)
+    for r in div_rows:
+        wid = (r.get("wsdc_id") or "").strip()
+        if not wid:
+            continue
+        role = (r.get("role") or "").strip()
+        groups[(wid, role)].append(r)
+
+    out: List[Dict] = []
+    for rows in groups.values():
+        known = [r for r in rows if DIVISION_INDEX.get(r.get("division") or "", -1) >= 0]
+        if known:
+            best = max(
+                known,
+                key=lambda r: (DIVISION_INDEX[r["division"]], r["points"]),
+            )
+        else:
+            best = max(rows, key=lambda r: r["points"])
+        out.append(best)
+    return out
 
 
 def load_placements(path: str) -> List[Dict]:
@@ -359,6 +388,10 @@ def build_rating_dashboard(div_rows: List[Dict]) -> str:
 <div class="page-header">
   <h1>🏅 Рейтинг танцоров по дивизионам</h1>
   <p>WSDC Points Registry · {today_str()}</p>
+  <p style="max-width:640px;margin:10px auto 0;color:var(--muted);font-size:.9rem;line-height:1.45">
+    Каждый танцор показан только в своём <strong>текущем</strong> (старшем) дивизионе по реестру —
+    без повторов в младших дивизионах, если уже есть очки выше.
+  </p>
   <div class="meta">{RULES_SOURCE} · Источник: danceConvention + points.worldsdc.com</div>
 </div>
 
@@ -1190,12 +1223,16 @@ def main() -> int:
 
     print("Zaghruzhayu dannye...")
     div_rows    = load_divisions(args.divisions_csv)
+    rating_rows = keep_only_highest_division_per_dancer(div_rows)
     placements  = load_placements(args.placements_csv)
     event_rows  = load_events(args.events_csv)
-    print(f"  divisions={len(div_rows)}, placements={len(placements)}, events={len(event_rows)}")
+    print(
+        f"  divisions={len(div_rows)} (rating: {len(rating_rows)} unique dancer-role), "
+        f"placements={len(placements)}, events={len(event_rows)}"
+    )
 
     pages = [
-        ("rating_dashboard.html",    build_rating_dashboard(div_rows)),
+        ("rating_dashboard.html",    build_rating_dashboard(rating_rows)),
         ("time_in_division.html",    build_time_dashboard(div_rows, placements)),
         ("speed_and_funnel.html",    build_speed_dashboard(div_rows)),
         ("tournament_results.html",  build_tournament_dashboard(event_rows, div_rows)),
