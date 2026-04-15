@@ -27,6 +27,10 @@ import requests
 
 BASE = "https://danceconvention.net/eventdirector/rest"
 
+# Transient network drops from DC servers — retry a few times
+REQUEST_RETRIES = 5
+REQUEST_BACKOFF = 2.0
+
 # Ивенты: (ключ для отчёта, event_id) — подобраны по названиям из events-feed
 DEFAULT_EVENTS: List[tuple[str, int]] = [
     ("Swing_and_Snow_2025", 300047750),
@@ -55,19 +59,32 @@ def login(session: requests.Session, email: str, password: str) -> None:
 
 
 def get_json_or_none(session: requests.Session, path: str):
-    """Returns (data, status_code). data=None if non-200."""
-    r = session.get(f"{BASE}{path}", timeout=60)
-    if r.status_code == 200:
-        return r.json(), 200
-    return None, r.status_code
+    """Returns (data, status_code). data=None if non-200. Retries on network errors."""
+    for attempt in range(REQUEST_RETRIES):
+        try:
+            r = session.get(f"{BASE}{path}", timeout=90)
+            if r.status_code == 200:
+                return r.json(), 200
+            return None, r.status_code
+        except requests.exceptions.RequestException as e:
+            if attempt == REQUEST_RETRIES - 1:
+                print(f"[warn] GET {path}: {e}", file=sys.stderr)
+                return None, -1
+            time.sleep(REQUEST_BACKOFF * (attempt + 1))
 
 
 def get_json(session: requests.Session, path: str) -> Any:
-    r = session.get(f"{BASE}{path}", timeout=60)
-    if r.status_code == 401:
-        raise RuntimeError(f"Unauthorized: {path}")
-    r.raise_for_status()
-    return r.json()
+    for attempt in range(REQUEST_RETRIES):
+        try:
+            r = session.get(f"{BASE}{path}", timeout=90)
+            if r.status_code == 401:
+                raise RuntimeError(f"Unauthorized: {path}")
+            r.raise_for_status()
+            return r.json()
+        except requests.exceptions.RequestException as e:
+            if attempt == REQUEST_RETRIES - 1:
+                raise
+            time.sleep(REQUEST_BACKOFF * (attempt + 1))
 
 
 def fetch_event_competitions(session: requests.Session, event_id: int) -> Dict[str, Any]:
