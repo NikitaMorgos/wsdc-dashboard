@@ -46,6 +46,13 @@ DIVISION_ORDER = ["Newcomer", "Novice", "Intermediate", "Advanced",
 
 DIVISION_INDEX = {d: i for i, d in enumerate(DIVISION_ORDER)}
 
+# Основная лестница WSDC (одна строка на танцора, если нет Soph/Masters)
+MAIN_LADDER_DIVISIONS = frozenset(
+    {"Newcomer", "Novice", "Intermediate", "Advanced", "All-Stars"}
+)
+# Sophisticated / Masters — отдельные треки: не схлопываем с основной лестницей
+SPECIAL_DIVISIONS = frozenset({"Sophisticated", "Masters"})
+
 DIVISION_COLORS = {
     "Newcomer":     "#06b6d4",
     "Novice":       "#4361ee",
@@ -114,10 +121,43 @@ def load_divisions(path: str) -> List[Dict]:
     return rows
 
 
-def keep_only_highest_division_per_dancer(div_rows: List[Dict]) -> List[Dict]:
+def _normalize_role(role: str) -> str:
+    r = (role or "").strip()
+    u = r.upper()
+    if u == "LEADER":
+        return "Leader"
+    if u == "FOLLOWER":
+        return "Follower"
+    return r
+
+
+def infer_division_from_contest_name(contest_name: str) -> Optional[str]:
+    """Грубое сопоставление названия конкурса DC с дивизионом WSDC."""
+    s = (contest_name or "").lower()
+    # Сначала более специфичные / отдельные треки
+    if "sophisticated" in s:
+        return "Sophisticated"
+    if "masters" in s or " master" in s:
+        return "Masters"
+    if "all star" in s or "allstar" in s or "all-star" in s:
+        return "All-Stars"
+    if "advanced" in s:
+        return "Advanced"
+    if "intermediate" in s:
+        return "Intermediate"
+    if "novice" in s:
+        return "Novice"
+    if "newcomer" in s:
+        return "Newcomer"
+    return None
+
+
+def build_rating_rows(div_rows: List[Dict]) -> List[Dict]:
     """
-    Один танцор на роль — только строка из самого старшего дивизиона в реестре
-    (нет дублей в Novice/Intermediate, если уже есть All-Stars и т.д.).
+    Рейтинг «текущий дивизион»:
+    - Без Soph/Masters: одна строка — самый старший из Newcomer…All-Stars.
+    - Если в реестре есть Sophisticated и/или Masters: все строки основной лестницы
+      + Soph + Masters (дубли между уровнями разрешены).
     """
     groups: Dict[Tuple[str, str], List[Dict]] = defaultdict(list)
     for r in div_rows:
@@ -129,16 +169,81 @@ def keep_only_highest_division_per_dancer(div_rows: List[Dict]) -> List[Dict]:
 
     out: List[Dict] = []
     for rows in groups.values():
-        known = [r for r in rows if DIVISION_INDEX.get(r.get("division") or "", -1) >= 0]
-        if known:
-            best = max(
-                known,
-                key=lambda r: (DIVISION_INDEX[r["division"]], r["points"]),
-            )
+        main_rows = [r for r in rows if r.get("division") in MAIN_LADDER_DIVISIONS]
+        spl_rows = [r for r in rows if r.get("division") in SPECIAL_DIVISIONS]
+        has_spl = bool(spl_rows)
+
+        if has_spl:
+            out.extend(main_rows)
+            out.extend(spl_rows)
         else:
-            best = max(rows, key=lambda r: r["points"])
-        out.append(best)
+            if main_rows:
+                best = max(
+                    main_rows,
+                    key=lambda r: (DIVISION_INDEX.get(r["division"], -1), r["points"]),
+                )
+                out.append(best)
+            else:
+                out.extend(spl_rows)
     return out
+
+
+def add_zero_point_rows_from_events(
+    rating_rows: List[Dict], events_csv_path: str
+) -> List[Dict]:
+    """
+    Добавляет строки с 0 очков по dc_wsdc_events_export: танцор есть в конкурсе,
+    но пары (wsdc_id, role, division) ещё нет в рейтинге (нет очков в реестре по дивизиону).
+    """
+    def key(r: Dict) -> Tuple[str, str, str]:
+        return (
+            (r.get("wsdc_id") or "").strip(),
+            (r.get("role") or "").strip(),
+            r.get("division") or "",
+        )
+
+    existing = {key(r) for r in rating_rows}
+    extra: Dict[Tuple[str, str, str], Dict] = {}
+
+    try:
+        with open(events_csv_path, encoding="utf-8-sig", newline="") as f:
+            for r in csv.DictReader(f):
+                wid = (r.get("wsdc_id") or "").strip()
+                if not wid:
+                    continue
+                role = _normalize_role(r.get("competitor_role", ""))
+                if role not in ("Leader", "Follower"):
+                    continue
+                div = infer_division_from_contest_name(r.get("contest_name", ""))
+                if not div or div not in DIVISION_INDEX:
+                    continue
+                k = (wid, role, div)
+                if k in existing:
+                    continue
+                if k not in extra:
+                    extra[k] = {
+                        "wsdc_id":   wid,
+                        "name":      r.get("competitor_name", "") or wid,
+                        "role":      role,
+                        "division":  div,
+                        "abbr":      "",
+                        "points":    0,
+                        "events":    0,
+                        "first":     "",
+                        "last":      "",
+                        "first_dt":  None,
+                        "last_dt":   None,
+                        "months":    None,
+                        "speed":     None,
+                    }
+                else:
+                    nm = r.get("competitor_name", "").strip()
+                    if nm and (not extra[k]["name"] or len(nm) > len(extra[k]["name"])):
+                        extra[k]["name"] = nm
+    except OSError:
+        pass
+
+    return rating_rows + list(extra.values())
 
 
 def load_placements(path: str) -> List[Dict]:
@@ -388,9 +493,10 @@ def build_rating_dashboard(div_rows: List[Dict]) -> str:
 <div class="page-header">
   <h1>🏅 Рейтинг танцоров по дивизионам</h1>
   <p>WSDC Points Registry · {today_str()}</p>
-  <p style="max-width:640px;margin:10px auto 0;color:var(--muted);font-size:.9rem;line-height:1.45">
-    Каждый танцор показан только в своём <strong>текущем</strong> (старшем) дивизионе по реестру —
-    без повторов в младших дивизионах, если уже есть очки выше.
+  <p style="max-width:720px;margin:10px auto 0;color:var(--muted);font-size:.9rem;line-height:1.45">
+    По основной лестнице (Newcomer → All-Stars) — один раз в самом старшем дивизионе, где есть очки в реестре.
+    <strong>Sophisticated</strong> и <strong>Masters</strong> — отдельно: там полный список; если у танцора есть Soph/Masters,
+    показываются и все его строки по основной лестнице. Участники с <strong>0</strong> очков в реестре добавлены по конкурсам danceConvention (если известен дивизион).
   </p>
   <div class="meta">{RULES_SOURCE} · Источник: danceConvention + points.worldsdc.com</div>
 </div>
@@ -1223,11 +1329,12 @@ def main() -> int:
 
     print("Zaghruzhayu dannye...")
     div_rows    = load_divisions(args.divisions_csv)
-    rating_rows = keep_only_highest_division_per_dancer(div_rows)
+    rating_rows = build_rating_rows(div_rows)
+    rating_rows = add_zero_point_rows_from_events(rating_rows, args.events_csv)
     placements  = load_placements(args.placements_csv)
     event_rows  = load_events(args.events_csv)
     print(
-        f"  divisions={len(div_rows)} (rating: {len(rating_rows)} unique dancer-role), "
+        f"  divisions={len(div_rows)} (rating rows: {len(rating_rows)}), "
         f"placements={len(placements)}, events={len(event_rows)}"
     )
 
