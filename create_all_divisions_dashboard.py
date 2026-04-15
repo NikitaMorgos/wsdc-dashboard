@@ -154,10 +154,11 @@ def infer_division_from_contest_name(contest_name: str) -> Optional[str]:
 
 def build_rating_rows(div_rows: List[Dict]) -> List[Dict]:
     """
-    Рейтинг «текущий дивизион»:
-    - Без Soph/Masters: одна строка — самый старший из Newcomer…All-Stars.
-    - Если в реестре есть Sophisticated и/или Masters: все строки основной лестницы
-      + Soph + Masters (дубли между уровнями разрешены).
+    Рейтинг «текущий дивизион» на основной лестнице:
+    - Ровно одна строка Newcomer…All-Stars — самый старший дивизион в реестре
+      (без раздувания историей Novice/Int, если человек уже выше).
+    - Sophisticated и Masters — отдельные треки: все строки Soph/Masters добавляются
+      поверх (не заменяют основную лестницу).
     """
     groups: Dict[Tuple[str, str], List[Dict]] = defaultdict(list)
     for r in div_rows:
@@ -171,20 +172,14 @@ def build_rating_rows(div_rows: List[Dict]) -> List[Dict]:
     for rows in groups.values():
         main_rows = [r for r in rows if r.get("division") in MAIN_LADDER_DIVISIONS]
         spl_rows = [r for r in rows if r.get("division") in SPECIAL_DIVISIONS]
-        has_spl = bool(spl_rows)
 
-        if has_spl:
-            out.extend(main_rows)
-            out.extend(spl_rows)
-        else:
-            if main_rows:
-                best = max(
-                    main_rows,
-                    key=lambda r: (DIVISION_INDEX.get(r["division"], -1), r["points"]),
-                )
-                out.append(best)
-            else:
-                out.extend(spl_rows)
+        if main_rows:
+            best = max(
+                main_rows,
+                key=lambda r: (DIVISION_INDEX.get(r["division"], -1), r["points"]),
+            )
+            out.append(best)
+        out.extend(spl_rows)
     return out
 
 
@@ -522,9 +517,8 @@ def build_rating_dashboard(div_rows: List[Dict]) -> str:
   <h1>🏅 Рейтинг танцоров по дивизионам</h1>
   <p>WSDC Points Registry · {today_str()}</p>
   <p style="max-width:720px;margin:10px auto 0;color:var(--muted);font-size:.9rem;line-height:1.45">
-    По основной лестнице (Newcomer → All-Stars) — один раз в самом старшем дивизионе, где есть очки в реестре.
-    <strong>Sophisticated</strong> и <strong>Masters</strong> — отдельно: там полный список; если у танцора есть Soph/Masters,
-    показываются и все его строки по основной лестнице. Участники с <strong>0</strong> очков — по конкурсам DC, если дивизион конкурса не ниже текущего в реестре.
+    По основной лестнице (Newcomer → All-Stars) — <strong>одна</strong> строка на танцора: самый старший дивизион в реестре (без исторических Novice/Int).
+    <strong>Sophisticated</strong> и <strong>Masters</strong> — дополнительно, отдельные вкладки. Участники с <strong>0</strong> очков — по конкурсам DC, если дивизион конкурса не ниже текущего в реестре.
   </p>
   <div class="meta">{RULES_SOURCE} · Источник: danceConvention + points.worldsdc.com</div>
 </div>
