@@ -188,13 +188,36 @@ def build_rating_rows(div_rows: List[Dict]) -> List[Dict]:
     return out
 
 
+def _max_main_ladder_index_by_pair(div_rows: List[Dict]) -> Dict[Tuple[str, str], int]:
+    """Максимальный индекс дивизиона на основной лестнице (по реестру), или -1 если нет."""
+    m: Dict[Tuple[str, str], int] = {}
+    for r in div_rows:
+        wid = (r.get("wsdc_id") or "").strip()
+        if not wid:
+            continue
+        role = (r.get("role") or "").strip()
+        div = r.get("division") or ""
+        if div not in MAIN_LADDER_DIVISIONS:
+            continue
+        idx = DIVISION_INDEX[div]
+        k = (wid, role)
+        if idx > m.get(k, -1):
+            m[k] = idx
+    return m
+
+
 def add_zero_point_rows_from_events(
-    rating_rows: List[Dict], events_csv_path: str
+    rating_rows: List[Dict],
+    events_csv_path: str,
+    div_rows: List[Dict],
 ) -> List[Dict]:
     """
-    Добавляет строки с 0 очков по dc_wsdc_events_export: танцор есть в конкурсе,
-    но пары (wsdc_id, role, division) ещё нет в рейтинге (нет очков в реестре по дивизиону).
+    Добавляет строки с 0 очков по dc_wsdc_events_export, если пары (wsdc_id, role, division)
+    ещё нет в рейтинге. Не добавляет дивизион **ниже** уже зафиксированного в реестре
+    по основной лестнице (иначе Intermediate оказывался бы и в Novice из старого конкурса).
     """
+    max_main = _max_main_ladder_index_by_pair(div_rows)
+
     def key(r: Dict) -> Tuple[str, str, str]:
         return (
             (r.get("wsdc_id") or "").strip(),
@@ -217,6 +240,11 @@ def add_zero_point_rows_from_events(
                 div = infer_division_from_contest_name(r.get("contest_name", ""))
                 if not div or div not in DIVISION_INDEX:
                     continue
+                if div in MAIN_LADDER_DIVISIONS:
+                    hi = max_main.get((wid, role), -1)
+                    lo = DIVISION_INDEX[div]
+                    if hi > lo:
+                        continue
                 k = (wid, role, div)
                 if k in existing:
                     continue
@@ -496,7 +524,7 @@ def build_rating_dashboard(div_rows: List[Dict]) -> str:
   <p style="max-width:720px;margin:10px auto 0;color:var(--muted);font-size:.9rem;line-height:1.45">
     По основной лестнице (Newcomer → All-Stars) — один раз в самом старшем дивизионе, где есть очки в реестре.
     <strong>Sophisticated</strong> и <strong>Masters</strong> — отдельно: там полный список; если у танцора есть Soph/Masters,
-    показываются и все его строки по основной лестнице. Участники с <strong>0</strong> очков в реестре добавлены по конкурсам danceConvention (если известен дивизион).
+    показываются и все его строки по основной лестнице. Участники с <strong>0</strong> очков — по конкурсам DC, если дивизион конкурса не ниже текущего в реестре.
   </p>
   <div class="meta">{RULES_SOURCE} · Источник: danceConvention + points.worldsdc.com</div>
 </div>
@@ -1330,7 +1358,9 @@ def main() -> int:
     print("Zaghruzhayu dannye...")
     div_rows    = load_divisions(args.divisions_csv)
     rating_rows = build_rating_rows(div_rows)
-    rating_rows = add_zero_point_rows_from_events(rating_rows, args.events_csv)
+    rating_rows = add_zero_point_rows_from_events(
+        rating_rows, args.events_csv, div_rows
+    )
     placements  = load_placements(args.placements_csv)
     event_rows  = load_events(args.events_csv)
     print(
