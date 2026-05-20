@@ -74,10 +74,8 @@
         .flow-box.csv { background: linear-gradient(180deg, #d4dcff 0%, #fff 100%); }
         .flow-box.viz { background: linear-gradient(180deg, #e0e8ff 0%, #fff 100%); }
         .flow-box.publish { background: linear-gradient(180deg, #c8d4ff 0%, #fff 100%); }
-        .flow-box.google-out { background: linear-gradient(180deg, #e8f4e8 0%, #fff 100%); border-color: #43a047; }
         .flow-box .title { font-weight: 700; color: #667eea; margin-bottom: 8px; font-size: 1.05em; }
         .flow-box.sources .title { color: #4361ee; }
-        .flow-box.google-out .title { color: #2e7d32; }
         .flow-box .desc { font-size: 0.9em; color: #555; line-height: 1.5; }
         .flow-arrow {
             width: 0; height: 0;
@@ -97,8 +95,6 @@
         }
         .flow-col { flex: 1; min-width: 260px; display: flex; flex-direction: column; align-items: center; gap: 0; }
         .flow-col .flow-box { max-width: 100%; }
-        .badge-new { display: inline-block; background: #4361ee; color: white; font-size: 0.7em; font-weight: 700; padding: 1px 6px; border-radius: 4px; vertical-align: middle; margin-left: 6px; }
-        .badge-out { display: inline-block; background: #43a047; color: white; font-size: 0.7em; font-weight: 700; padding: 1px 6px; border-radius: 4px; vertical-align: middle; margin-left: 6px; }
     </style>
 </head>
 <body>
@@ -110,7 +106,7 @@
         </div>
 
         <div class="card">
-            <p>Данные об участниках и их WSDC ID берутся напрямую из API DanceConvention по итогам ивентов. Затем по ID запрашиваются очки в WSDC Registry. Google Таблица используется как витрина для хранения и быстрого просмотра очков, но больше не является посредником для поиска танцоров.</p>
+            <p>Данные об участниках и их WSDC ID берутся напрямую из API DanceConvention по итогам ивентов. Затем по ID запрашиваются очки в WSDC Registry. Итоговый CSV сразу идёт в дашборды — Google Таблица в процессе больше не участвует.</p>
         </div>
 
         <div class="card">
@@ -144,29 +140,14 @@
                     <div class="desc">name_ru, name_en, wsdc_id, division, role, points_YYYY-MM-DD, last_event_*, months_to_close_novice …</div>
                 </div>
                 <div class="flow-arrow"></div>
-                <div class="flow-row">
-                    <div class="flow-col">
-                        <div class="flow-box viz">
-                            <div class="title">ВИЗУАЛИЗАЦИЯ</div>
-                            <div class="desc"><code>create_all_divisions_dashboard.py</code><br><code>create_novice_*</code>, <code>create_advanced_charts.py</code> → HTML (Chart.js)</div>
-                        </div>
-                        <div class="flow-arrow"></div>
-                        <div class="flow-box publish">
-                            <div class="title">ПУБЛИКАЦИЯ САЙТА</div>
-                            <div class="desc"><code>index.html</code> + дашборды → GitHub → GitHub Pages<br>https://nikitamorgos.github.io/wsdc-dashboard/</div>
-                        </div>
-                    </div>
-                    <div class="flow-col">
-                        <div class="flow-box google-out">
-                            <div class="title">GOOGLE ТАБЛИЦА (выход)</div>
-                            <div class="desc">
-                                Витрина для просмотра и ручных правок<br>
-                                <code>refresh_sheet_points_from_wsdc.py</code> — обновить все очки из WSDC API<br>
-                                <code>refresh_one_dancer_points.py</code> — обновить одного танцора<br>
-                                <code>upload_to_google_sheets.py</code> — полная перезаливка CSV
-                            </div>
-                        </div>
-                    </div>
+                <div class="flow-box viz">
+                    <div class="title">ВИЗУАЛИЗАЦИЯ</div>
+                    <div class="desc"><code>create_all_divisions_dashboard.py</code><br><code>create_novice_*</code>, <code>create_advanced_charts.py</code> → HTML (Chart.js)</div>
+                </div>
+                <div class="flow-arrow"></div>
+                <div class="flow-box publish">
+                    <div class="title">ПУБЛИКАЦИЯ САЙТА</div>
+                    <div class="desc"><code>index.html</code> + дашборды → GitHub → GitHub Pages<br>https://nikitamorgos.github.io/wsdc-dashboard/</div>
                 </div>
             </div>
         </div>
@@ -179,10 +160,9 @@
                 </thead>
                 <tbody>
                     <tr><td><strong>Вход</strong></td><td>DanceConvention API</td><td><code>export_dc_wsdc_from_events.py</code> — final/prelim-round-results → WSDC ID участников</td></tr>
-                    <tr><td><strong>Вход</strong></td><td>WSDC Registry API</td><td>HTTP (points.worldsdc.com): поиск и очки по ID; <code>fetch_wsdc_registry_from_dc_export.py</code></td></tr>
-                    <tr><td><strong>Вход</strong></td><td>PDF/TXT</td><td>Парсинг имён с ивентов; <code>add_dancers_from_pdf.py</code></td></tr>
+                    <tr><td><strong>Вход</strong></td><td>WSDC Registry API</td><td>HTTP (points.worldsdc.com): очки по ID; <code>fetch_wsdc_registry_from_dc_export.py</code></td></tr>
+                    <tr><td><strong>Вход</strong></td><td>PDF/TXT</td><td>Парсинг имён с ивентов; <code>add_dancers_from_pdf.py</code> (резервный путь)</td></tr>
                     <tr><td><strong>Выход</strong></td><td>CSV</td><td>Цепочка скриптов → итоговый CSV</td></tr>
-                    <tr><td><strong>Выход</strong></td><td>Google Таблица</td><td>Витрина: <code>refresh_sheet_points_from_wsdc.py</code>, <code>upload_to_google_sheets.py</code></td></tr>
                     <tr><td><strong>Выход</strong></td><td>Сайт</td><td>HTML-дашборды → GitHub Pages</td></tr>
                 </tbody>
             </table>
@@ -208,12 +188,6 @@
                 <li><code>create_all_divisions_dashboard.py</code> — общий рейтинг по всем дивизионам</li>
                 <li><code>create_novice_rating_dashboard.py</code>, <code>create_novice_closing_speed_dashboard.py</code> — рейтинг и скорость закрытия Novice</li>
                 <li><code>create_advanced_charts.py</code> — дополнительные аналитические дашборды</li>
-            </ul>
-            <h3>Обновление Google Таблицы</h3>
-            <ul>
-                <li><code>refresh_sheet_points_from_wsdc.py</code> — обходит всех танцоров в таблице, запрашивает актуальные очки из WSDC API, обновляет столбец points_&lt;дата&gt;</li>
-                <li><code>refresh_one_dancer_points.py</code> — то же, для одного танцора по его wsdc_id</li>
-                <li><code>upload_to_google_sheets.py</code> — полная перезаливка CSV в лист (с опцией --clear)</li>
             </ul>
             <h3>Публикация</h3>
             <ul>
@@ -241,10 +215,7 @@
 ├── <span class="file">create_all_divisions_dashboard.py</span>
 ├── <span class="file">create_novice_rating_dashboard.py</span>
 ├── <span class="file">create_novice_closing_speed_dashboard.py</span>
-├── <span class="file">refresh_sheet_points_from_wsdc.py</span>           <span class="comment"># Обновить очки в Google Sheet</span>
-├── <span class="file">refresh_one_dancer_points.py</span>
-├── <span class="file">upload_to_google_sheets.py</span>
-├── <span class="file">credentials.json</span>                            <span class="comment"># не в git</span>
+├── <span class="file">credentials.json</span>                            <span class="comment"># не в git (DC credentials)</span>
 ├── <span class="file">.gitignore</span>
 └── <span class="file">АРХИТЕКТУРА_ПРОЕКТА.md</span></pre>
         </div>
@@ -256,7 +227,6 @@
                 <li><strong>Запросить очки из WSDC</strong> — <code>fetch_wsdc_registry_from_dc_export.py --input &lt;csv&gt;</code> → обогащённый CSV с дивизионами, ролями, очками.</li>
                 <li><strong>Почистить и финализировать</strong> — при необходимости запустить <code>fix_*</code>, <code>add_novice_*</code>, <code>add_event_info.py</code>, <code>finalize_data.py</code>.</li>
                 <li><strong>Пересобрать дашборды</strong> — <code>create_all_divisions_dashboard.py</code> и другие <code>create_*</code>, передав итоговый CSV.</li>
-                <li><strong>Обновить Google Таблицу</strong> (опционально) — <code>refresh_sheet_points_from_wsdc.py</code> для обновления очков, или <code>upload_to_google_sheets.py &lt;csv&gt; --clear</code> для полной перезаливки.</li>
                 <li><strong>Опубликовать сайт</strong> — в GitHub Desktop: Commit to main → Push origin. Через 1–2 минуты GitHub Pages обновит сайт.</li>
             </ol>
         </div>
@@ -264,10 +234,9 @@
         <div class="card">
             <h2>6. Зависимости и секреты</h2>
             <ul>
-                <li><strong>Python:</strong> pandas, requests, gspread, google-auth; для дашбордов — Chart.js из CDN.</li>
+                <li><strong>Python:</strong> pandas, requests; для дашбордов — Chart.js из CDN.</li>
                 <li><strong>DanceConvention:</strong> учётные данные DC (<code>DC_EMAIL</code>, <code>DC_PASSWORD</code>) передаются через переменные окружения или <code>.env</code>.</li>
-                <li><strong>Google Sheets:</strong> <code>credentials.json</code> для Google Sheets API; не коммитить.</li>
-                <li><strong>Git ignore:</strong> <code>*.csv</code>, <code>*credentials*.json</code>, <code>.env</code>, кэш Python — в <code>.gitignore</code>.</li>
+                <li><strong>Git ignore:</strong> <code>*.csv</code>, <code>.env</code>, кэш Python — в <code>.gitignore</code>.</li>
             </ul>
         </div>
 
