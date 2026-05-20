@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Архитектура проекта — WSDC Points</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+        .container { max-width: 960px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 36px;
+        }
+        .header h1 { font-size: 2em; margin-bottom: 8px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .header p { font-size: 1.05em; opacity: 0.95; }
+        .back { display: inline-block; margin-bottom: 24px; color: rgba(255,255,255,0.95); text-decoration: none; font-weight: 600; }
+        .back:hover { text-decoration: underline; }
+        .card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .card h2 {
+            color: #667eea;
+            font-size: 1.35em;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e6ff;
+        }
+        .card h3 { color: #555; font-size: 1.1em; margin: 16px 0 8px; }
+        .card ul, .card ol { margin-left: 20px; line-height: 1.6; }
+        .card li { margin-bottom: 4px; }
+        .card p { line-height: 1.6; margin-bottom: 8px; }
+        .card code, .flow-box code { font-family: 'Consolas', monospace; background: #f0f2ff; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        th, td { border: 1px solid #ddd; padding: 10px 12px; text-align: left; }
+        th { background: #667eea; color: white; font-weight: 600; }
+        tr:nth-child(even) { background: #f8f9ff; }
+        .tree { font-family: 'Consolas', monospace; font-size: 0.9em; line-height: 1.7; background: #f8f9ff; padding: 16px; border-radius: 8px; overflow-x: auto; }
+        .tree .dir { color: #667eea; }
+        .tree .file { color: #333; }
+        .tree .comment { color: #888; }
+
+        /* Блок-схема */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            margin: 24px 0;
+        }
+        .flow-box {
+            width: 100%;
+            max-width: 520px;
+            padding: 16px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+        }
+        .flow-box.sources { background: linear-gradient(180deg, #e8ecff 0%, #fff 100%); }
+        .flow-box.process { background: linear-gradient(180deg, #f0f4ff 0%, #fff 100%); }
+        .flow-box.csv { background: linear-gradient(180deg, #d4dcff 0%, #fff 100%); }
+        .flow-box.viz { background: linear-gradient(180deg, #e0e8ff 0%, #fff 100%); }
+        .flow-box.google { background: linear-gradient(180deg, #e0e8ff 0%, #fff 100%); }
+        .flow-box.publish { background: linear-gradient(180deg, #c8d4ff 0%, #fff 100%); }
+        .flow-box .title { font-weight: 700; color: #667eea; margin-bottom: 8px; font-size: 1.05em; }
+        .flow-box .desc { font-size: 0.9em; color: #555; line-height: 1.5; }
+        .flow-arrow {
+            width: 0; height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 14px solid #667eea;
+            margin: -2px 0;
+        }
+        .flow-row {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .flow-col { flex: 1; min-width: 260px; display: flex; flex-direction: column; align-items: center; gap: 0; }
+        .flow-col .flow-box { max-width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back">← Назад к дашбордам</a>
+        <div class="header">
+            <h1>Архитектура проекта WSDC Points</h1>
+            <p>Схема данных, компонентов и публикации</p>
+        </div>
+
+        <div class="card">
+            <p>Сбор данных об очках WSDC из реестра и Google Таблиц, очистка и обогащение, визуализация в дашбордах и публикация на сайте; синхронизация с Google Таблицей.</p>
+        </div>
+
+        <div class="card">
+            <h2>1. Схема «от данных до сайта»</h2>
+            <div class="flow">
+                <div class="flow-box sources">
+                    <div class="title">ИСТОЧНИКИ ДАННЫХ</div>
+                    <div class="desc">Google Таблица (имена, комментарии) · PDF/TXT (списки с ивентов) · WSDC Registry API (points.worldsdc.com)</div>
+                </div>
+                <div class="flow-arrow"></div>
+                <div class="flow-box process">
+                    <div class="title">СБОР И ПЕРВИЧНАЯ ОБРАБОТКА</div>
+                    <div class="desc"><code>wsdc_from_google_sheet.py</code> — имена из Sheet → транслит → WSDC API → CSV<br>
+                    <code>add_dancers_from_pdf.py</code> — имена из PDF/TXT → WSDC → CSV</div>
+                </div>
+                <div class="flow-arrow"></div>
+                <div class="flow-box process">
+                    <div class="title">ОЧИСТКА И ИСПРАВЛЕНИЯ</div>
+                    <div class="desc"><code>fix_*</code>, <code>apply_google_sheet_comments.py</code>, <code>add_novice_*</code>, <code>add_event_info.py</code>, <code>finalize_data.py</code></div>
+                </div>
+                <div class="flow-arrow"></div>
+                <div class="flow-box csv">
+                    <div class="title">ИТОГОВЫЙ CSV</div>
+                    <div class="desc">name_ru, name_en, wsdc_id, division, role, points_YYYY-MM-DD, last_event_*, months_to_close_novice …<br>или короткая копия <code>wsdc_latest.csv</code></div>
+                </div>
+                <div class="flow-arrow"></div>
+                <div class="flow-row">
+                    <div class="flow-col">
+                        <div class="flow-box viz">
+                            <div class="title">ВИЗУАЛИЗАЦИЯ</div>
+                            <div class="desc"><code>create_novice_rating_dashboard.py</code><br><code>create_novice_closing_speed_dashboard.py</code><br><code>create_novice_dashboard.py</code> и др. → HTML (Chart.js)</div>
+                        </div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box publish">
+                            <div class="title">ПУБЛИКАЦИЯ САЙТА</div>
+                            <div class="desc"><code>index.html</code> + дашборды → GitHub → GitHub Pages<br>https://&lt;логин&gt;.github.io/&lt;репо&gt;/</div>
+                        </div>
+                    </div>
+                    <div class="flow-col">
+                        <div class="flow-box google">
+                            <div class="title">ВЫГРУЗКА В GOOGLE ТАБЛИЦУ</div>
+                            <div class="desc"><code>upload_to_google_sheets.py</code> — полная заливка<br><code>upload_latest_to_sheets.py</code> — последний CSV<br><code>append_points_column_to_sheets.py</code> — столбец points_&lt;дата&gt;</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>2. Источники и приёмники данных</h2>
+            <table>
+                <thead>
+                    <tr><th>Направление</th><th>Что</th><th>Как</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Вход</strong></td><td>Google Таблица</td><td>Чтение имён и комментариев; <code>wsdc_from_google_sheet.py</code>, <code>apply_google_sheet_comments.py</code></td></tr>
+                    <tr><td><strong>Вход</strong></td><td>WSDC Registry</td><td>HTTP API (points.worldsdc.com): поиск, очки по ID, ивенты (JSON)</td></tr>
+                    <tr><td><strong>Вход</strong></td><td>PDF/TXT</td><td>Парсинг имён с ивентов; <code>add_dancers_from_pdf.py</code></td></tr>
+                    <tr><td><strong>Выход</strong></td><td>CSV</td><td>Цепочка скриптов → один итоговый CSV или <code>wsdc_latest.csv</code></td></tr>
+                    <tr><td><strong>Выход</strong></td><td>Google Таблица</td><td><code>upload_to_google_sheets.py</code>, <code>append_points_column_to_sheets.py</code></td></tr>
+                    <tr><td><strong>Выход</strong></td><td>Сайт</td><td>HTML-дашборды + <code>index.html</code> → GitHub Pages</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>3. Основные компоненты по ролям</h2>
+            <h3>Сбор и обогащение</h3>
+            <ul>
+                <li><code>wsdc_from_google_sheet.py</code> — Google Sheet → транслит → WSDC API → CSV</li>
+                <li><code>add_dancers_from_pdf.py</code> — добавление имён из PDF/TXT и запрос очков в WSDC</li>
+                <li><code>add_event_info.py</code> — даты/названия ивентов и <code>months_to_close_novice</code> из API</li>
+            </ul>
+            <h3>Очистка и нормализация</h3>
+            <ul>
+                <li><code>fix_*</code> — исправление имён, ID, дублей; <code>apply_google_sheet_comments.py</code> — правила из комментариев в таблице</li>
+                <li><code>add_novice_columns.py</code>, <code>add_novice_zero_points.py</code> — колонки Novice/Allowed, строки с 0 очков</li>
+                <li><code>finalize_data.py</code> — финальный вид CSV (points_&lt;дата&gt;, name_ru, порядок колонок)</li>
+            </ul>
+            <h3>Визуализация</h3>
+            <ul>
+                <li><code>create_novice_rating_dashboard.py</code>, <code>create_novice_closing_speed_dashboard.py</code> — рейтинг и скорость закрытия Novice</li>
+                <li><code>create_novice_dashboard.py</code>, <code>create_novice_leader_charts.py</code>, <code>create_advanced_charts.py</code> — дашборды в <code>charts/*.html</code></li>
+            </ul>
+            <h3>Интеграция с Google</h3>
+            <ul>
+                <li><code>upload_to_google_sheets.py</code> — загрузка CSV в лист (с опцией --clear)</li>
+                <li><code>upload_latest_to_sheets.py</code> — загрузка последнего CSV или <code>wsdc_latest.csv</code></li>
+                <li><code>append_points_column_to_sheets.py</code> — добавление столбца <code>points_&lt;дата&gt;</code> в таблицу</li>
+            </ul>
+            <h3>Публикация</h3>
+            <ul>
+                <li><code>index.html</code> — главная страница со ссылками на дашборды</li>
+                <li>Репозиторий на GitHub + GitHub Pages (ветка main) → публичный URL сайта</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>4. Файловая структура (ключевое)</h2>
+            <pre class="tree"><span class="dir">Dashboard_content/</span>
+├── <span class="file">index.html</span>                          <span class="comment"># Главная страница</span>
+├── <span class="file">novice_rating_dashboard.html</span>
+├── <span class="file">novice_closing_speed_dashboard.html</span>
+├── <span class="dir">charts/</span>
+│   ├── <span class="file">novice_dashboard.html</span>
+│   ├── <span class="file">novice_leader_dashboard.html</span>
+│   └── <span class="file">advanced_analysis_dashboard.html</span>
+├── <span class="file">wsdc_from_google_sheet.py</span>           <span class="comment"># Сбор из Google Sheet + WSDC API</span>
+├── <span class="file">add_dancers_from_pdf.py</span>
+├── <span class="file">add_event_info.py</span>
+├── <span class="file">fix_*.py</span>, <span class="file">comprehensive_fix.py</span>
+├── <span class="file">apply_google_sheet_comments.py</span>
+├── <span class="file">finalize_data.py</span>
+├── <span class="file">create_novice_rating_dashboard.py</span>
+├── <span class="file">create_novice_closing_speed_dashboard.py</span>
+├── <span class="file">upload_to_google_sheets.py</span>
+├── <span class="file">upload_latest_to_sheets.py</span>
+├── <span class="file">append_points_column_to_sheets.py</span>
+├── <span class="file">credentials.json</span>                    <span class="comment"># не в git</span>
+├── <span class="file">.gitignore</span>
+└── <span class="file">АРХИТЕКТУРА_ПРОЕКТА.md</span></pre>
+        </div>
+
+        <div class="card">
+            <h2>5. Типовой сценарий использования</h2>
+            <ol>
+                <li><strong>Обновить данные с WSDC</strong> — запустить <code>wsdc_from_google_sheet.py</code> или <code>add_dancers_from_pdf.py</code>, затем цепочку fix/apply/finalize при необходимости.</li>
+                <li><strong>Получить итоговый CSV</strong> — результат пайплайна (например <code>*with_events_months_fixed.csv</code>). Опционально скопировать в <code>wsdc_latest.csv</code>.</li>
+                <li><strong>Обновить Google Таблицу</strong> — <code>upload_to_google_sheets.py &lt;csv&gt; --clear</code> или <code>upload_latest_to_sheets.py</code>, либо только новый столбец: <code>append_points_column_to_sheets.py</code>.</li>
+                <li><strong>Пересобрать дашборды</strong> — запустить нужные <code>create_*_dashboard.py</code> / <code>create_*_charts.py</code>, передав итоговый CSV.</li>
+                <li><strong>Опубликовать изменения на сайте</strong> — в GitHub Desktop: рабочая папка → Commit to main → Push origin. Через 1–2 минуты GitHub Pages обновит сайт.</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>6. Зависимости и секреты</h2>
+            <ul>
+                <li><strong>Python:</strong> pandas, requests, beautifulsoup4, gspread, google-auth; для дашбордов — pandas + Chart.js из CDN.</li>
+                <li><strong>Секреты:</strong> <code>credentials.json</code> (или <code>credentials.json.json</code>) для Google Sheets API; не коммитить (см. ЧТО_СДЕЛАТЬ_В_GOOGLE.md).</li>
+                <li><strong>Игнор в Git:</strong> <code>*.csv</code>, <code>*credentials*.json</code>, кэш Python — в <code>.gitignore</code>; короткое имя <code>wsdc_latest.csv</code> (см. ДЛИННЫЕ_ИМЕНА_ФАЙЛОВ.md).</li>
+            </ul>
+        </div>
+
+        <p style="text-align: center; color: rgba(255,255,255,0.9); margin-top: 32px;">
+            <a href="index.html" style="color: white; font-weight: 600;">← Назад к дашбордам</a>
+        </p>
+    </div>
+</body>
+</html>
