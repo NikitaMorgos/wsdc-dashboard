@@ -61,7 +61,7 @@
         }
         .flow-box {
             width: 100%;
-            max-width: 520px;
+            max-width: 560px;
             padding: 16px 20px;
             background: white;
             border: 2px solid #667eea;
@@ -69,13 +69,15 @@
             text-align: center;
             position: relative;
         }
-        .flow-box.sources { background: linear-gradient(180deg, #e8ecff 0%, #fff 100%); }
+        .flow-box.sources { background: linear-gradient(180deg, #e8ecff 0%, #fff 100%); border-color: #4361ee; }
         .flow-box.process { background: linear-gradient(180deg, #f0f4ff 0%, #fff 100%); }
         .flow-box.csv { background: linear-gradient(180deg, #d4dcff 0%, #fff 100%); }
         .flow-box.viz { background: linear-gradient(180deg, #e0e8ff 0%, #fff 100%); }
-        .flow-box.google { background: linear-gradient(180deg, #e0e8ff 0%, #fff 100%); }
         .flow-box.publish { background: linear-gradient(180deg, #c8d4ff 0%, #fff 100%); }
+        .flow-box.google-out { background: linear-gradient(180deg, #e8f4e8 0%, #fff 100%); border-color: #43a047; }
         .flow-box .title { font-weight: 700; color: #667eea; margin-bottom: 8px; font-size: 1.05em; }
+        .flow-box.sources .title { color: #4361ee; }
+        .flow-box.google-out .title { color: #2e7d32; }
         .flow-box .desc { font-size: 0.9em; color: #555; line-height: 1.5; }
         .flow-arrow {
             width: 0; height: 0;
@@ -95,6 +97,8 @@
         }
         .flow-col { flex: 1; min-width: 260px; display: flex; flex-direction: column; align-items: center; gap: 0; }
         .flow-col .flow-box { max-width: 100%; }
+        .badge-new { display: inline-block; background: #4361ee; color: white; font-size: 0.7em; font-weight: 700; padding: 1px 6px; border-radius: 4px; vertical-align: middle; margin-left: 6px; }
+        .badge-out { display: inline-block; background: #43a047; color: white; font-size: 0.7em; font-weight: 700; padding: 1px 6px; border-radius: 4px; vertical-align: middle; margin-left: 6px; }
     </style>
 </head>
 <body>
@@ -106,7 +110,7 @@
         </div>
 
         <div class="card">
-            <p>Сбор данных об очках WSDC из реестра и Google Таблиц, очистка и обогащение, визуализация в дашбордах и публикация на сайте; синхронизация с Google Таблицей.</p>
+            <p>Данные об участниках и их WSDC ID берутся напрямую из API DanceConvention по итогам ивентов. Затем по ID запрашиваются очки в WSDC Registry. Google Таблица используется как витрина для хранения и быстрого просмотра очков, но больше не является посредником для поиска танцоров.</p>
         </div>
 
         <div class="card">
@@ -114,41 +118,53 @@
             <div class="flow">
                 <div class="flow-box sources">
                     <div class="title">ИСТОЧНИКИ ДАННЫХ</div>
-                    <div class="desc">Google Таблица (имена, комментарии) · PDF/TXT (списки с ивентов) · WSDC Registry API (points.worldsdc.com)</div>
+                    <div class="desc">
+                        <strong>DanceConvention API</strong> — результаты финалов и prelim/semi по ивентам, WSDC ID участников<br>
+                        <strong>WSDC Registry API</strong> (points.worldsdc.com) — очки по WSDC ID<br>
+                        <strong>PDF/TXT</strong> — ручные списки с ивентов (резервный путь)
+                    </div>
                 </div>
                 <div class="flow-arrow"></div>
                 <div class="flow-box process">
-                    <div class="title">СБОР И ПЕРВИЧНАЯ ОБРАБОТКА</div>
-                    <div class="desc"><code>wsdc_from_google_sheet.py</code> — имена из Sheet → транслит → WSDC API → CSV<br>
-                    <code>add_dancers_from_pdf.py</code> — имена из PDF/TXT → WSDC → CSV</div>
+                    <div class="title">СБОР ДАННЫХ</div>
+                    <div class="desc">
+                        <code>export_dc_wsdc_from_events.py</code> — DC API → список участников + WSDC ID → CSV<br>
+                        <code>fetch_wsdc_registry_from_dc_export.py</code> — берёт CSV с WSDC ID → запрашивает очки в WSDC API<br>
+                        <code>add_dancers_from_pdf.py</code> — имена из PDF/TXT → поиск в WSDC API
+                    </div>
                 </div>
                 <div class="flow-arrow"></div>
                 <div class="flow-box process">
-                    <div class="title">ОЧИСТКА И ИСПРАВЛЕНИЯ</div>
-                    <div class="desc"><code>fix_*</code>, <code>apply_google_sheet_comments.py</code>, <code>add_novice_*</code>, <code>add_event_info.py</code>, <code>finalize_data.py</code></div>
+                    <div class="title">ОЧИСТКА И ОБОГАЩЕНИЕ</div>
+                    <div class="desc"><code>fix_*</code>, <code>add_novice_*</code>, <code>add_event_info.py</code>, <code>finalize_data.py</code></div>
                 </div>
                 <div class="flow-arrow"></div>
                 <div class="flow-box csv">
                     <div class="title">ИТОГОВЫЙ CSV</div>
-                    <div class="desc">name_ru, name_en, wsdc_id, division, role, points_YYYY-MM-DD, last_event_*, months_to_close_novice …<br>или короткая копия <code>wsdc_latest.csv</code></div>
+                    <div class="desc">name_ru, name_en, wsdc_id, division, role, points_YYYY-MM-DD, last_event_*, months_to_close_novice …</div>
                 </div>
                 <div class="flow-arrow"></div>
                 <div class="flow-row">
                     <div class="flow-col">
                         <div class="flow-box viz">
                             <div class="title">ВИЗУАЛИЗАЦИЯ</div>
-                            <div class="desc"><code>create_novice_rating_dashboard.py</code><br><code>create_novice_closing_speed_dashboard.py</code><br><code>create_novice_dashboard.py</code> и др. → HTML (Chart.js)</div>
+                            <div class="desc"><code>create_all_divisions_dashboard.py</code><br><code>create_novice_*</code>, <code>create_advanced_charts.py</code> → HTML (Chart.js)</div>
                         </div>
                         <div class="flow-arrow"></div>
                         <div class="flow-box publish">
                             <div class="title">ПУБЛИКАЦИЯ САЙТА</div>
-                            <div class="desc"><code>index.html</code> + дашборды → GitHub → GitHub Pages<br>https://&lt;логин&gt;.github.io/&lt;репо&gt;/</div>
+                            <div class="desc"><code>index.html</code> + дашборды → GitHub → GitHub Pages<br>https://nikitamorgos.github.io/wsdc-dashboard/</div>
                         </div>
                     </div>
                     <div class="flow-col">
-                        <div class="flow-box google">
-                            <div class="title">ВЫГРУЗКА В GOOGLE ТАБЛИЦУ</div>
-                            <div class="desc"><code>upload_to_google_sheets.py</code> — полная заливка<br><code>upload_latest_to_sheets.py</code> — последний CSV<br><code>append_points_column_to_sheets.py</code> — столбец points_&lt;дата&gt;</div>
+                        <div class="flow-box google-out">
+                            <div class="title">GOOGLE ТАБЛИЦА (выход)</div>
+                            <div class="desc">
+                                Витрина для просмотра и ручных правок<br>
+                                <code>refresh_sheet_points_from_wsdc.py</code> — обновить все очки из WSDC API<br>
+                                <code>refresh_one_dancer_points.py</code> — обновить одного танцора<br>
+                                <code>upload_to_google_sheets.py</code> — полная перезаливка CSV
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -162,40 +178,42 @@
                     <tr><th>Направление</th><th>Что</th><th>Как</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><strong>Вход</strong></td><td>Google Таблица</td><td>Чтение имён и комментариев; <code>wsdc_from_google_sheet.py</code>, <code>apply_google_sheet_comments.py</code></td></tr>
-                    <tr><td><strong>Вход</strong></td><td>WSDC Registry</td><td>HTTP API (points.worldsdc.com): поиск, очки по ID, ивенты (JSON)</td></tr>
+                    <tr><td><strong>Вход</strong></td><td>DanceConvention API</td><td><code>export_dc_wsdc_from_events.py</code> — final/prelim-round-results → WSDC ID участников</td></tr>
+                    <tr><td><strong>Вход</strong></td><td>WSDC Registry API</td><td>HTTP (points.worldsdc.com): поиск и очки по ID; <code>fetch_wsdc_registry_from_dc_export.py</code></td></tr>
                     <tr><td><strong>Вход</strong></td><td>PDF/TXT</td><td>Парсинг имён с ивентов; <code>add_dancers_from_pdf.py</code></td></tr>
-                    <tr><td><strong>Выход</strong></td><td>CSV</td><td>Цепочка скриптов → один итоговый CSV или <code>wsdc_latest.csv</code></td></tr>
-                    <tr><td><strong>Выход</strong></td><td>Google Таблица</td><td><code>upload_to_google_sheets.py</code>, <code>append_points_column_to_sheets.py</code></td></tr>
-                    <tr><td><strong>Выход</strong></td><td>Сайт</td><td>HTML-дашборды + <code>index.html</code> → GitHub Pages</td></tr>
+                    <tr><td><strong>Выход</strong></td><td>CSV</td><td>Цепочка скриптов → итоговый CSV</td></tr>
+                    <tr><td><strong>Выход</strong></td><td>Google Таблица</td><td>Витрина: <code>refresh_sheet_points_from_wsdc.py</code>, <code>upload_to_google_sheets.py</code></td></tr>
+                    <tr><td><strong>Выход</strong></td><td>Сайт</td><td>HTML-дашборды → GitHub Pages</td></tr>
                 </tbody>
             </table>
         </div>
 
         <div class="card">
             <h2>3. Основные компоненты по ролям</h2>
-            <h3>Сбор и обогащение</h3>
+            <h3>Сбор данных</h3>
             <ul>
-                <li><code>wsdc_from_google_sheet.py</code> — Google Sheet → транслит → WSDC API → CSV</li>
-                <li><code>add_dancers_from_pdf.py</code> — добавление имён из PDF/TXT и запрос очков в WSDC</li>
+                <li><code>export_dc_wsdc_from_events.py</code> — обращается к DanceConvention API, скачивает списки участников финалов (и prelim), извлекает WSDC ID → CSV</li>
+                <li><code>fetch_wsdc_registry_from_dc_export.py</code> — принимает CSV с WSDC ID, запрашивает актуальные очки в WSDC Registry API, обогащает данные (дивизион, роль, ивенты)</li>
+                <li><code>add_dancers_from_pdf.py</code> — резервный путь: парсит имена из PDF/TXT, ищет по WSDC API</li>
                 <li><code>add_event_info.py</code> — даты/названия ивентов и <code>months_to_close_novice</code> из API</li>
             </ul>
             <h3>Очистка и нормализация</h3>
             <ul>
-                <li><code>fix_*</code> — исправление имён, ID, дублей; <code>apply_google_sheet_comments.py</code> — правила из комментариев в таблице</li>
+                <li><code>fix_*</code> — исправление имён, ID, дублей</li>
                 <li><code>add_novice_columns.py</code>, <code>add_novice_zero_points.py</code> — колонки Novice/Allowed, строки с 0 очков</li>
                 <li><code>finalize_data.py</code> — финальный вид CSV (points_&lt;дата&gt;, name_ru, порядок колонок)</li>
             </ul>
             <h3>Визуализация</h3>
             <ul>
+                <li><code>create_all_divisions_dashboard.py</code> — общий рейтинг по всем дивизионам</li>
                 <li><code>create_novice_rating_dashboard.py</code>, <code>create_novice_closing_speed_dashboard.py</code> — рейтинг и скорость закрытия Novice</li>
-                <li><code>create_novice_dashboard.py</code>, <code>create_novice_leader_charts.py</code>, <code>create_advanced_charts.py</code> — дашборды в <code>charts/*.html</code></li>
+                <li><code>create_advanced_charts.py</code> — дополнительные аналитические дашборды</li>
             </ul>
-            <h3>Интеграция с Google</h3>
+            <h3>Обновление Google Таблицы</h3>
             <ul>
-                <li><code>upload_to_google_sheets.py</code> — загрузка CSV в лист (с опцией --clear)</li>
-                <li><code>upload_latest_to_sheets.py</code> — загрузка последнего CSV или <code>wsdc_latest.csv</code></li>
-                <li><code>append_points_column_to_sheets.py</code> — добавление столбца <code>points_&lt;дата&gt;</code> в таблицу</li>
+                <li><code>refresh_sheet_points_from_wsdc.py</code> — обходит всех танцоров в таблице, запрашивает актуальные очки из WSDC API, обновляет столбец points_&lt;дата&gt;</li>
+                <li><code>refresh_one_dancer_points.py</code> — то же, для одного танцора по его wsdc_id</li>
+                <li><code>upload_to_google_sheets.py</code> — полная перезаливка CSV в лист (с опцией --clear)</li>
             </ul>
             <h3>Публикация</h3>
             <ul>
@@ -207,25 +225,26 @@
         <div class="card">
             <h2>4. Файловая структура (ключевое)</h2>
             <pre class="tree"><span class="dir">Dashboard_content/</span>
-├── <span class="file">index.html</span>                          <span class="comment"># Главная страница</span>
-├── <span class="file">novice_rating_dashboard.html</span>
-├── <span class="file">novice_closing_speed_dashboard.html</span>
+├── <span class="file">index.html</span>                                  <span class="comment"># Главная страница</span>
 ├── <span class="dir">charts/</span>
-│   ├── <span class="file">novice_dashboard.html</span>
-│   ├── <span class="file">novice_leader_dashboard.html</span>
+│   ├── <span class="file">rating_dashboard.html</span>                   <span class="comment"># Рейтинг по всем дивизионам</span>
+│   ├── <span class="file">time_in_division.html</span>
+│   ├── <span class="file">speed_and_funnel.html</span>
+│   ├── <span class="file">tournament_results.html</span>
 │   └── <span class="file">advanced_analysis_dashboard.html</span>
-├── <span class="file">wsdc_from_google_sheet.py</span>           <span class="comment"># Сбор из Google Sheet + WSDC API</span>
-├── <span class="file">add_dancers_from_pdf.py</span>
+├── <span class="file">export_dc_wsdc_from_events.py</span>               <span class="comment"># DC API → WSDC ID участников</span>
+├── <span class="file">fetch_wsdc_registry_from_dc_export.py</span>       <span class="comment"># WSDC ID → очки из WSDC API</span>
+├── <span class="file">add_dancers_from_pdf.py</span>                     <span class="comment"># Резервный путь через PDF/TXT</span>
 ├── <span class="file">add_event_info.py</span>
-├── <span class="file">fix_*.py</span>, <span class="file">comprehensive_fix.py</span>
-├── <span class="file">apply_google_sheet_comments.py</span>
+├── <span class="file">fix_*.py</span>
 ├── <span class="file">finalize_data.py</span>
+├── <span class="file">create_all_divisions_dashboard.py</span>
 ├── <span class="file">create_novice_rating_dashboard.py</span>
 ├── <span class="file">create_novice_closing_speed_dashboard.py</span>
+├── <span class="file">refresh_sheet_points_from_wsdc.py</span>           <span class="comment"># Обновить очки в Google Sheet</span>
+├── <span class="file">refresh_one_dancer_points.py</span>
 ├── <span class="file">upload_to_google_sheets.py</span>
-├── <span class="file">upload_latest_to_sheets.py</span>
-├── <span class="file">append_points_column_to_sheets.py</span>
-├── <span class="file">credentials.json</span>                    <span class="comment"># не в git</span>
+├── <span class="file">credentials.json</span>                            <span class="comment"># не в git</span>
 ├── <span class="file">.gitignore</span>
 └── <span class="file">АРХИТЕКТУРА_ПРОЕКТА.md</span></pre>
         </div>
@@ -233,20 +252,22 @@
         <div class="card">
             <h2>5. Типовой сценарий использования</h2>
             <ol>
-                <li><strong>Обновить данные с WSDC</strong> — запустить <code>wsdc_from_google_sheet.py</code> или <code>add_dancers_from_pdf.py</code>, затем цепочку fix/apply/finalize при необходимости.</li>
-                <li><strong>Получить итоговый CSV</strong> — результат пайплайна (например <code>*with_events_months_fixed.csv</code>). Опционально скопировать в <code>wsdc_latest.csv</code>.</li>
-                <li><strong>Обновить Google Таблицу</strong> — <code>upload_to_google_sheets.py &lt;csv&gt; --clear</code> или <code>upload_latest_to_sheets.py</code>, либо только новый столбец: <code>append_points_column_to_sheets.py</code>.</li>
-                <li><strong>Пересобрать дашборды</strong> — запустить нужные <code>create_*_dashboard.py</code> / <code>create_*_charts.py</code>, передав итоговый CSV.</li>
-                <li><strong>Опубликовать изменения на сайте</strong> — в GitHub Desktop: рабочая папка → Commit to main → Push origin. Через 1–2 минуты GitHub Pages обновит сайт.</li>
+                <li><strong>Получить участников ивента из DC</strong> — <code>export_dc_wsdc_from_events.py</code> → CSV с WSDC ID.</li>
+                <li><strong>Запросить очки из WSDC</strong> — <code>fetch_wsdc_registry_from_dc_export.py --input &lt;csv&gt;</code> → обогащённый CSV с дивизионами, ролями, очками.</li>
+                <li><strong>Почистить и финализировать</strong> — при необходимости запустить <code>fix_*</code>, <code>add_novice_*</code>, <code>add_event_info.py</code>, <code>finalize_data.py</code>.</li>
+                <li><strong>Пересобрать дашборды</strong> — <code>create_all_divisions_dashboard.py</code> и другие <code>create_*</code>, передав итоговый CSV.</li>
+                <li><strong>Обновить Google Таблицу</strong> (опционально) — <code>refresh_sheet_points_from_wsdc.py</code> для обновления очков, или <code>upload_to_google_sheets.py &lt;csv&gt; --clear</code> для полной перезаливки.</li>
+                <li><strong>Опубликовать сайт</strong> — в GitHub Desktop: Commit to main → Push origin. Через 1–2 минуты GitHub Pages обновит сайт.</li>
             </ol>
         </div>
 
         <div class="card">
             <h2>6. Зависимости и секреты</h2>
             <ul>
-                <li><strong>Python:</strong> pandas, requests, beautifulsoup4, gspread, google-auth; для дашбордов — pandas + Chart.js из CDN.</li>
-                <li><strong>Секреты:</strong> <code>credentials.json</code> (или <code>credentials.json.json</code>) для Google Sheets API; не коммитить (см. ЧТО_СДЕЛАТЬ_В_GOOGLE.md).</li>
-                <li><strong>Игнор в Git:</strong> <code>*.csv</code>, <code>*credentials*.json</code>, кэш Python — в <code>.gitignore</code>; короткое имя <code>wsdc_latest.csv</code> (см. ДЛИННЫЕ_ИМЕНА_ФАЙЛОВ.md).</li>
+                <li><strong>Python:</strong> pandas, requests, gspread, google-auth; для дашбордов — Chart.js из CDN.</li>
+                <li><strong>DanceConvention:</strong> учётные данные DC (<code>DC_EMAIL</code>, <code>DC_PASSWORD</code>) передаются через переменные окружения или <code>.env</code>.</li>
+                <li><strong>Google Sheets:</strong> <code>credentials.json</code> для Google Sheets API; не коммитить.</li>
+                <li><strong>Git ignore:</strong> <code>*.csv</code>, <code>*credentials*.json</code>, <code>.env</code>, кэш Python — в <code>.gitignore</code>.</li>
             </ul>
         </div>
 
