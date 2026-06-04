@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Динамика за 2026 год · WSDC Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+:root{--blue:#4361ee;--indigo:#3a0ca3;--purple:#7209b7;--pink:#f72585;
+      --green:#2dc653;--amber:#f4a261;--cyan:#06b6d4;--red:#e63946;
+      --dark:#0d1117;--card:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--dark);
+     color:var(--text);line-height:1.6;padding:24px 16px 60px;}
+a{color:var(--blue);text-decoration:none;}
+a:hover{text-decoration:underline;}
+.wrap{max-width:1200px;margin:0 auto;}
+.page-header{text-align:center;padding:32px 0 40px;}
+.page-header h1{font-size:2rem;font-weight:800;margin-bottom:8px;}
+.page-header p{color:var(--muted);font-size:.95rem;}
+.meta{font-size:.73rem;color:var(--muted);margin-top:6px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;}
+.section-title{font-size:1.25rem;font-weight:700;margin-bottom:18px;padding-bottom:10px;
+               border-bottom:1px solid var(--border);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+@media(max-width:900px){.grid2,.grid3,.grid4{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.grid2,.grid3,.grid4{grid-template-columns:1fr;}}
+.stat-box{text-align:center;padding:18px;}
+.stat-num{font-size:2.4rem;font-weight:800;line-height:1;}
+.stat-lbl{font-size:.75rem;color:var(--muted);margin-top:4px;}
+table{width:100%;border-collapse:collapse;font-size:.875rem;}
+th{color:var(--muted);font-weight:600;text-align:left;padding:8px 12px;
+   border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:8px 12px;border-bottom:1px solid rgba(48,54,61,.5);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.03);}
+.badge{display:inline-block;font-size:.68rem;font-weight:700;padding:3px 9px;
+       border-radius:20px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+.prog-wrap{background:var(--border);border-radius:4px;height:7px;width:100%;min-width:60px;}
+.prog-bar{height:7px;border-radius:4px;}
+.tab-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.tab-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);
+         background:transparent;color:var(--muted);cursor:pointer;font-size:.82rem;
+         transition:all .18s;}
+.tab-btn:hover{color:var(--text);border-color:#555;}
+.tab-btn.active{color:#fff;border-color:transparent;}
+.role-btn{padding:6px 18px;border-radius:20px;border:1px solid var(--border);
+          background:transparent;color:var(--muted);cursor:pointer;font-size:.82rem;
+          transition:all .18s;}
+.role-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);
+           font-size:.83rem;margin-bottom:28px;border:1px solid var(--border);
+           padding:6px 14px;border-radius:8px;transition:all .18s;}
+.back-link:hover{color:var(--text);border-color:#555;text-decoration:none;}
+.search-box{width:100%;background:var(--card);border:1px solid var(--border);
+            border-radius:8px;color:var(--text);padding:9px 14px;font-size:.88rem;
+            margin-bottom:16px;outline:none;}
+.search-box:focus{border-color:var(--blue);}
+.canvas-wrap{position:relative;height:340px;margin:8px 0 4px;}
+.mb20{margin-bottom:20px;}
+.mb32{margin-bottom:32px;}
+.gold{color:#f6d365;} .silver{color:#c0c0c0;} .bronze{color:#cd7f32;}
+.pts{font-weight:700;color:var(--blue);}
+.rank-medal{font-size:1.1rem;}
+</style>
+
+<style>
+nav{position:sticky;top:0;z-index:100;background:rgba(13,17,23,.94);
+     backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+     padding:10px 16px;display:flex;gap:6px;flex-wrap:wrap;}
+nav a{font-size:.78rem;color:var(--muted);padding:5px 11px;border-radius:6px;
+       border:1px solid transparent;transition:all .18s;}
+nav a:hover,nav a.active{color:var(--text);border-color:var(--border);
+                           background:var(--card);text-decoration:none;}
+</style>
+</head>
+<body>
+<nav><a href="../charts/rating_dashboard.html">🏅 Рейтинги</a>
+<a href="../charts/time_in_division.html">⏱ Время</a>
+<a href="../charts/speed_and_funnel.html">⚡ Скорость</a>
+<a href="../charts/year_dynamics.html" class="active">📈 2026</a>
+<a href="../index.html">🏠 Главная</a>
+</nav>
+<div class="wrap">
+
+<a href="../index.html" class="back-link">← Главная</a>
+<div class="page-header">
+  <h1>📈 Динамика за 2026 год</h1>
+  <p>Сколько очков заработано на ивентах 2026 года · 04.06.2026</p>
+  <p style="max-width:720px;margin:10px auto 0;color:var(--muted);font-size:.9rem;line-height:1.45">
+    Сумма очков по каждому ивенту WSDC с датой в 2026 году. Один танцор может быть в нескольких дивизионах
+    (если выступал в разных конкурсах). Рейтинг внутри дивизиона и роли.
+  </p>
+  <div class="meta">Источник: points.worldsdc.com · danceConvention</div>
+</div>
+
+<div class="card mb32">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+    <div class="tab-bar" id="divTabs"><button class="tab-btn" data-div="Newcomer" onclick="switchDiv(this)" style="border-color:#06b6d430">Newcomer</button>
+<button class="tab-btn" data-div="Novice" onclick="switchDiv(this)" style="border-color:#4361ee30">Novice</button>
+<button class="tab-btn" data-div="Intermediate" onclick="switchDiv(this)" style="border-color:#7209b730">Intermediate</button>
+<button class="tab-btn" data-div="Advanced" onclick="switchDiv(this)" style="border-color:#f7258530">Advanced</button>
+<button class="tab-btn" data-div="All-Stars" onclick="switchDiv(this)" style="border-color:#f4a26130">All-Stars</button>
+<button class="tab-btn" data-div="Sophisticated" onclick="switchDiv(this)" style="border-color:#2dc65330">Sophisticated</button>
+<button class="tab-btn" data-div="Masters" onclick="switchDiv(this)" style="border-color:#8b949e30">Masters</button>
+</div>
+    <div style="display:flex;gap:8px;">
+      <button class="role-btn active" id="btnLeader" onclick="switchRole('Leader')">Leader</button>
+      <button class="role-btn" id="btnFollower" onclick="switchRole('Follower')">Follower</button>
+    </div>
+  </div>
+  <input class="search-box" id="searchBox" placeholder="Поиск по имени…" oninput="renderAll()"
+         style="max-width:280px;margin-bottom:16px;">
+
+  <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;" id="statsRow"></div>
+
+  <div class="canvas-wrap mb20">
+    <canvas id="yearChart"></canvas>
+  </div>
+
+  <div id="tableWrap"></div>
+</div>
+
+<script>
+const ALL_DATA = {"Newcomer": {"color": "#06b6d4", "Leader": [{"rank": 1, "name": "Tamara Battalova", "wsdc_id": "23453", "points": 3, "events": 1}, {"rank": 2, "name": "Nadezhda Isaenko", "wsdc_id": "21901", "points": 3, "events": 1}, {"rank": 3, "name": "Aleksey Yarynich", "wsdc_id": "27560", "points": 2, "events": 1}, {"rank": 4, "name": "Vladimir Tarasov", "wsdc_id": "27561", "points": 1, "events": 1}, {"rank": 5, "name": "Polina Goryacheva", "wsdc_id": "28096", "points": 1, "events": 1}], "Follower": [{"rank": 1, "name": "Victoria Davydova", "wsdc_id": "27562", "points": 6, "events": 1}, {"rank": 2, "name": "Yevgeniya Sekisova", "wsdc_id": "28097", "points": 6, "events": 1}, {"rank": 3, "name": "Tatyana Kachura", "wsdc_id": "28098", "points": 4, "events": 1}, {"rank": 4, "name": "Darya Silyutina", "wsdc_id": "27564", "points": 3, "events": 1}, {"rank": 5, "name": "Evgenia Tarasova", "wsdc_id": "27565", "points": 2, "events": 1}, {"rank": 6, "name": "Tatyana Isayeva-Kashtanova", "wsdc_id": "27566", "points": 1, "events": 1}]}, "Novice": {"color": "#4361ee", "Leader": [{"rank": 1, "name": "Nikita Morgos", "wsdc_id": "22562", "points": 16, "events": 2}, {"rank": 2, "name": "Anna Morozova", "wsdc_id": "12122", "points": 16, "events": 1}, {"rank": 3, "name": "Ed Shevchenko", "wsdc_id": "26056", "points": 15, "events": 1}, {"rank": 4, "name": "Ivo Azirjans", "wsdc_id": "24224", "points": 13, "events": 3}, {"rank": 5, "name": "Grigoriy Kochnev", "wsdc_id": "22034", "points": 12, "events": 1}, {"rank": 6, "name": "Aleksandr Patutinskiy", "wsdc_id": "23757", "points": 12, "events": 1}, {"rank": 7, "name": "Tatiana Boikova", "wsdc_id": "19101", "points": 12, "events": 1}, {"rank": 8, "name": "Yevgeniy Perfilyev", "wsdc_id": "26617", "points": 12, "events": 2}, {"rank": 9, "name": "Sergey Zabolotnyy", "wsdc_id": "23449", "points": 10, "events": 1}, {"rank": 10, "name": "Sergey Yepifantsev", "wsdc_id": "23779", "points": 9, "events": 2}, {"rank": 11, "name": "Konstantin Chaikun", "wsdc_id": "26615", "points": 8, "events": 1}, {"rank": 12, "name": "Alena Ivanova", "wsdc_id": "23440", "points": 4, "events": 3}, {"rank": 13, "name": "Ruslan Mukmenzyanov", "wsdc_id": "21218", "points": 2, "events": 2}, {"rank": 14, "name": "Artur Gareev", "wsdc_id": "23444", "points": 2, "events": 2}, {"rank": 15, "name": "Nikita Parichuk", "wsdc_id": "26219", "points": 2, "events": 2}, {"rank": 16, "name": "Ekaterina Kosheleva", "wsdc_id": "25007", "points": 1, "events": 1}, {"rank": 17, "name": "Kristina Yakubova", "wsdc_id": "26218", "points": 1, "events": 1}, {"rank": 18, "name": "Dmitriy Kanev", "wsdc_id": "27228", "points": 1, "events": 1}, {"rank": 19, "name": "Dmitriy Bursh", "wsdc_id": "26198", "points": 1, "events": 1}], "Follower": [{"rank": 1, "name": "Anastasiya Rybakova", "wsdc_id": "27567", "points": 21, "events": 2}, {"rank": 2, "name": "Ilona Bozhe", "wsdc_id": "25018", "points": 16, "events": 2}, {"rank": 3, "name": "Anna Gimalldinova", "wsdc_id": "18054", "points": 15, "events": 1}, {"rank": 4, "name": "Nadezhda Zhirikova", "wsdc_id": "22040", "points": 14, "events": 2}, {"rank": 5, "name": "Alexandra Kleymenova", "wsdc_id": "26208", "points": 12, "events": 1}, {"rank": 6, "name": "Darya Fomchenko", "wsdc_id": "24712", "points": 12, "events": 1}, {"rank": 7, "name": "Tamara Battalova", "wsdc_id": "23453", "points": 10, "events": 1}, {"rank": 8, "name": "Olga Lisitsyna", "wsdc_id": "25593", "points": 10, "events": 1}, {"rank": 9, "name": "Ksenia Chichay", "wsdc_id": "26221", "points": 8, "events": 1}, {"rank": 10, "name": "Marina Tikhonova", "wsdc_id": "24891", "points": 8, "events": 1}, {"rank": 11, "name": "Yelena Malorosiyantseva", "wsdc_id": "22183", "points": 1, "events": 1}, {"rank": 12, "name": "Valentina Kholina", "wsdc_id": "13602", "points": 1, "events": 1}, {"rank": 13, "name": "Natallya Ponpa", "wsdc_id": "18414", "points": 1, "events": 1}, {"rank": 14, "name": "Olga Yushkantseva", "wsdc_id": "27230", "points": 1, "events": 1}, {"rank": 15, "name": "Viktoriya Zabrovskaya", "wsdc_id": "27123", "points": 1, "events": 1}, {"rank": 16, "name": "Svetlana Prosina", "wsdc_id": "26223", "points": 1, "events": 1}, {"rank": 17, "name": "Valeriya Selyuk", "wsdc_id": "14993", "points": 1, "events": 1}, {"rank": 18, "name": "Svetlana Alexandrova", "wsdc_id": "8937", "points": 1, "events": 1}, {"rank": 19, "name": "Natalya Vetchinova", "wsdc_id": "25591", "points": 1, "events": 1}, {"rank": 20, "name": "Sichinskaya Anna", "wsdc_id": "24164", "points": 1, "events": 1}, {"rank": 21, "name": "Safronova Victoria", "wsdc_id": "24163", "points": 1, "events": 1}, {"rank": 22, "name": "Elvira Gafarova", "wsdc_id": "19861", "points": 1, "events": 1}, {"rank": 23, "name": "Darya Fedorova", "wsdc_id": "25588", "points": 1, "events": 1}, {"rank": 24, "name": "Svetlana Kocheva", "wsdc_id": "16026", "points": 1, "events": 1}]}, "Intermediate": {"color": "#7209b7", "Leader": [{"rank": 1, "name": "Igor Ejov", "wsdc_id": "17540", "points": 11, "events": 2}, {"rank": 2, "name": "Anton Sochnev", "wsdc_id": "24709", "points": 10, "events": 1}, {"rank": 3, "name": "Fedor Mayboroda", "wsdc_id": "22568", "points": 10, "events": 2}, {"rank": 4, "name": "Aleksandr Parfenenko", "wsdc_id": "22035", "points": 9, "events": 2}, {"rank": 5, "name": "Vladimir Shikov", "wsdc_id": "20736", "points": 7, "events": 2}, {"rank": 6, "name": "Viacheslav Volkov", "wsdc_id": "20714", "points": 6, "events": 1}, {"rank": 7, "name": "Mikhail Borisov", "wsdc_id": "19996", "points": 5, "events": 2}, {"rank": 8, "name": "Aleksei Pushkarev", "wsdc_id": "22817", "points": 5, "events": 2}, {"rank": 9, "name": "Ilya Ustinov", "wsdc_id": "19233", "points": 3, "events": 2}, {"rank": 10, "name": "Alexander Borisenko", "wsdc_id": "19050", "points": 2, "events": 1}, {"rank": 11, "name": "Mikhail Shufer", "wsdc_id": "21087", "points": 1, "events": 1}, {"rank": 12, "name": "Klim Borisov", "wsdc_id": "20705", "points": 1, "events": 1}, {"rank": 13, "name": "Sergey Zabolotnyy", "wsdc_id": "23449", "points": 1, "events": 1}, {"rank": 14, "name": "Igor Gorodnichev", "wsdc_id": "19997", "points": 1, "events": 1}, {"rank": 15, "name": "Yevgeniy Borisov", "wsdc_id": "25590", "points": 1, "events": 1}], "Follower": [{"rank": 1, "name": "Alisa Kuznetsova", "wsdc_id": "22870", "points": 17, "events": 5}, {"rank": 2, "name": "Polina Gerasimenko", "wsdc_id": "22042", "points": 17, "events": 4}, {"rank": 3, "name": "Mariia Ilina", "wsdc_id": "24724", "points": 16, "events": 2}, {"rank": 4, "name": "Marina Kondrateva", "wsdc_id": "22573", "points": 15, "events": 1}, {"rank": 5, "name": "Yelena Fedotova", "wsdc_id": "16633", "points": 15, "events": 1}, {"rank": 6, "name": "Lilia Anchutina", "wsdc_id": "20718", "points": 10, "events": 1}, {"rank": 7, "name": "Nataliya Babak", "wsdc_id": "24711", "points": 10, "events": 1}, {"rank": 8, "name": "Anna Tsapurina", "wsdc_id": "20007", "points": 8, "events": 1}, {"rank": 9, "name": "Svetlana Zyryanova", "wsdc_id": "18306", "points": 8, "events": 1}, {"rank": 10, "name": "Anna Os`kina", "wsdc_id": "19054", "points": 6, "events": 1}, {"rank": 11, "name": "Nina Bondar'", "wsdc_id": "13804", "points": 3, "events": 2}, {"rank": 12, "name": "Arina Apetyan", "wsdc_id": "24397", "points": 2, "events": 2}, {"rank": 13, "name": "Anastasiya Lishtovnaya", "wsdc_id": "22184", "points": 2, "events": 2}, {"rank": 14, "name": "Tatiana Boikova", "wsdc_id": "19101", "points": 1, "events": 1}, {"rank": 15, "name": "Marina Girina", "wsdc_id": "25592", "points": 1, "events": 1}, {"rank": 16, "name": "Alena Ivanova", "wsdc_id": "23440", "points": 1, "events": 1}, {"rank": 17, "name": "Yelizaveta Ivanova", "wsdc_id": "12333", "points": 1, "events": 1}, {"rank": 18, "name": "Yekaterina Kurganova", "wsdc_id": "13811", "points": 1, "events": 1}, {"rank": 19, "name": "Yuliya Prokopyeva", "wsdc_id": "21380", "points": 1, "events": 1}, {"rank": 20, "name": "Evgeniya Zemskova", "wsdc_id": "20708", "points": 1, "events": 1}, {"rank": 21, "name": "Olesya Ulanova", "wsdc_id": "13701", "points": 1, "events": 1}, {"rank": 22, "name": "Liudmila Dmitrieva", "wsdc_id": "17464", "points": 1, "events": 1}]}, "Advanced": {"color": "#f72585", "Leader": [{"rank": 1, "name": "Kalaychidi Vladislav", "wsdc_id": "22986", "points": 12, "events": 4}, {"rank": 2, "name": "Vasiliy Skurydin", "wsdc_id": "22567", "points": 10, "events": 1}, {"rank": 3, "name": "Ilyas Galiev", "wsdc_id": "18041", "points": 9, "events": 4}, {"rank": 4, "name": "Pavel Kozlov", "wsdc_id": "12329", "points": 8, "events": 3}, {"rank": 5, "name": "Oleg Fabritskiy", "wsdc_id": "20002", "points": 8, "events": 1}, {"rank": 6, "name": "Pavel Levchenko", "wsdc_id": "15981", "points": 6, "events": 1}, {"rank": 7, "name": "Dmitriy Panov", "wsdc_id": "22569", "points": 4, "events": 1}, {"rank": 8, "name": "Anna Danilova", "wsdc_id": "20062", "points": 2, "events": 1}, {"rank": 9, "name": "Artem Lebsak", "wsdc_id": "15381", "points": 2, "events": 1}, {"rank": 10, "name": "Maxim Feoktistov", "wsdc_id": "10081", "points": 1, "events": 1}, {"rank": 11, "name": "Mikhail Kalambet", "wsdc_id": "12111", "points": 1, "events": 1}, {"rank": 12, "name": "Konstantin Vorobyev", "wsdc_id": "17656", "points": 1, "events": 1}, {"rank": 13, "name": "Taras Petrenko", "wsdc_id": "17099", "points": 1, "events": 1}, {"rank": 14, "name": "Timofei Ejov", "wsdc_id": "20059", "points": 1, "events": 1}], "Follower": [{"rank": 1, "name": "Natalya Bykova", "wsdc_id": "19990", "points": 18, "events": 2}, {"rank": 2, "name": "Anastasiya Ivanova", "wsdc_id": "20063", "points": 16, "events": 3}, {"rank": 3, "name": "Ekaterina Grigorieva", "wsdc_id": "20716", "points": 10, "events": 5}, {"rank": 4, "name": "Anna Morozova", "wsdc_id": "12122", "points": 9, "events": 2}, {"rank": 5, "name": "Olga Aziattseva", "wsdc_id": "19982", "points": 8, "events": 1}, {"rank": 6, "name": "Elena Logashina", "wsdc_id": "10762", "points": 7, "events": 2}, {"rank": 7, "name": "Anna Zhukova", "wsdc_id": "21381", "points": 6, "events": 1}, {"rank": 8, "name": "Gulnaz Ubaseva", "wsdc_id": "21090", "points": 5, "events": 2}, {"rank": 9, "name": "Ekaterina Orlova", "wsdc_id": "18663", "points": 3, "events": 2}, {"rank": 10, "name": "Oksana Aleksandrovich", "wsdc_id": "11009", "points": 2, "events": 1}, {"rank": 11, "name": "Tatiana Kaneva", "wsdc_id": "22987", "points": 1, "events": 1}, {"rank": 12, "name": "Yanna Zhdankina", "wsdc_id": "23452", "points": 1, "events": 1}, {"rank": 13, "name": "Anastasiya Naydenova", "wsdc_id": "19291", "points": 1, "events": 1}, {"rank": 14, "name": "Tatiana Schmidt", "wsdc_id": "19987", "points": 1, "events": 1}, {"rank": 15, "name": "Anastasia Telegina", "wsdc_id": "12652", "points": 1, "events": 1}, {"rank": 16, "name": "Yuliya Ustinova", "wsdc_id": "18418", "points": 1, "events": 1}]}, "All-Stars": {"color": "#f4a261", "Leader": [{"rank": 1, "name": "Pavel Katunin", "wsdc_id": "14201", "points": 10, "events": 2}, {"rank": 2, "name": "Artur Radzikhovsky", "wsdc_id": "8173", "points": 9, "events": 2}, {"rank": 3, "name": "Konstantin Baranov", "wsdc_id": "10079", "points": 6, "events": 3}, {"rank": 4, "name": "Artem Shapovalov", "wsdc_id": "13603", "points": 3, "events": 1}, {"rank": 5, "name": "Artem Dmitriev", "wsdc_id": "10576", "points": 1, "events": 1}, {"rank": 6, "name": "Vladimir Leonov", "wsdc_id": "8945", "points": 1, "events": 1}], "Follower": [{"rank": 1, "name": "Ilmira Galieva", "wsdc_id": "12106", "points": 11, "events": 3}, {"rank": 2, "name": "Anastasiya Yuzhakova", "wsdc_id": "20719", "points": 5, "events": 4}, {"rank": 3, "name": "Ekaterina Gorianaya", "wsdc_id": "14022", "points": 4, "events": 1}, {"rank": 4, "name": "Anastasiia Babakhan", "wsdc_id": "16091", "points": 4, "events": 2}, {"rank": 5, "name": "Eugeniya Dudukina", "wsdc_id": "8385", "points": 3, "events": 1}, {"rank": 6, "name": "Olga Aziattseva", "wsdc_id": "19982", "points": 2, "events": 1}, {"rank": 7, "name": "Irina Popovichenko", "wsdc_id": "14203", "points": 2, "events": 1}]}, "Sophisticated": {"color": "#2dc653", "Leader": [{"rank": 1, "name": "Pavel Kozlov", "wsdc_id": "12329", "points": 25, "events": 5}, {"rank": 2, "name": "Artem Shapovalov", "wsdc_id": "13603", "points": 14, "events": 2}, {"rank": 3, "name": "Pavel Katunin", "wsdc_id": "14201", "points": 10, "events": 1}, {"rank": 4, "name": "Konstantin Baranov", "wsdc_id": "10079", "points": 10, "events": 3}, {"rank": 5, "name": "Artem Lebsak", "wsdc_id": "15381", "points": 9, "events": 2}, {"rank": 6, "name": "Pavel Levchenko", "wsdc_id": "15981", "points": 8, "events": 1}, {"rank": 7, "name": "Mikhail Borisov", "wsdc_id": "19996", "points": 4, "events": 1}, {"rank": 8, "name": "Artur Radzikhovsky", "wsdc_id": "8173", "points": 4, "events": 1}, {"rank": 9, "name": "Aleksey Grigoriev", "wsdc_id": "8182", "points": 3, "events": 2}, {"rank": 10, "name": "Vladimir Leonov", "wsdc_id": "8945", "points": 2, "events": 1}, {"rank": 11, "name": "Maxim Feoktistov", "wsdc_id": "10081", "points": 1, "events": 1}, {"rank": 12, "name": "Oleg Fabritskiy", "wsdc_id": "20002", "points": 1, "events": 1}, {"rank": 13, "name": "Yevgeniy Lishtovnyy", "wsdc_id": "21217", "points": 1, "events": 1}, {"rank": 14, "name": "Mikhail Kalambet", "wsdc_id": "12111", "points": 1, "events": 1}, {"rank": 15, "name": "II'ya Melikhov", "wsdc_id": "13645", "points": 1, "events": 1}], "Follower": [{"rank": 1, "name": "Gulnaz Ubaseva", "wsdc_id": "21090", "points": 18, "events": 4}, {"rank": 2, "name": "Anastasia Lokshina", "wsdc_id": "9110", "points": 16, "events": 2}, {"rank": 3, "name": "Ilmira Galieva", "wsdc_id": "12106", "points": 15, "events": 1}, {"rank": 4, "name": "Gul'nara Arkhipova", "wsdc_id": "9523", "points": 12, "events": 1}, {"rank": 5, "name": "Ekaterina Gorianaya", "wsdc_id": "14022", "points": 11, "events": 2}, {"rank": 6, "name": "Ekaterina Orlova", "wsdc_id": "18663", "points": 10, "events": 1}, {"rank": 7, "name": "Elena Logashina", "wsdc_id": "10762", "points": 9, "events": 2}, {"rank": 8, "name": "Eugeniya Dudukina", "wsdc_id": "8385", "points": 8, "events": 1}, {"rank": 9, "name": "Svetlana Moskaleva", "wsdc_id": "8024", "points": 7, "events": 2}, {"rank": 10, "name": "Yanna Zhdankina", "wsdc_id": "23452", "points": 7, "events": 2}, {"rank": 11, "name": "Yevgeniya Karachentsova", "wsdc_id": "15367", "points": 7, "events": 2}, {"rank": 12, "name": "Anna Zhukova", "wsdc_id": "21381", "points": 6, "events": 1}, {"rank": 13, "name": "Olga Usmanova", "wsdc_id": "8145", "points": 4, "events": 1}, {"rank": 14, "name": "Olesya Ulanova", "wsdc_id": "13701", "points": 4, "events": 1}, {"rank": 15, "name": "Katia Avlasevich", "wsdc_id": "7599", "points": 3, "events": 2}, {"rank": 16, "name": "Oksana Aleksandrovich", "wsdc_id": "11009", "points": 3, "events": 2}, {"rank": 17, "name": "Nina Yershova", "wsdc_id": "15593", "points": 1, "events": 1}, {"rank": 18, "name": "Tatiana Kaneva", "wsdc_id": "22987", "points": 1, "events": 1}, {"rank": 19, "name": "Larisa Bratkovskaya", "wsdc_id": "16036", "points": 1, "events": 1}, {"rank": 20, "name": "Anna Spiridonova", "wsdc_id": "21220", "points": 1, "events": 1}, {"rank": 21, "name": "Tatiana Schmidt", "wsdc_id": "19987", "points": 1, "events": 1}, {"rank": 22, "name": "Anna Morozova", "wsdc_id": "12122", "points": 1, "events": 1}]}, "Masters": {"color": "#8b949e", "Leader": [], "Follower": [{"rank": 1, "name": "Liudmila Dmitrieva", "wsdc_id": "17464", "points": 6, "events": 1}]}};
+const YEAR = 2026;
+let currentDiv = null;
+let currentRole = 'Leader';
+let yearChart = null;
+
+function initDefaultDiv() {
+  const order = ["Newcomer", "Novice", "Intermediate", "Advanced", "All-Stars", "Sophisticated", "Masters"];
+  for (const d of order) {
+    if (ALL_DATA[d] && (ALL_DATA[d].Leader.length || ALL_DATA[d].Follower.length)) {
+      return d;
+    }
+  }
+  return null;
+}
+
+window.onload = function() {
+  currentDiv = initDefaultDiv();
+  document.querySelectorAll('.tab-btn').forEach(t => {
+    if (t.dataset.div === currentDiv) t.classList.add('active');
+  });
+  renderAll();
+};
+
+function switchDiv(btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentDiv = btn.dataset.div;
+  renderAll();
+}
+
+function switchRole(role) {
+  currentRole = role;
+  document.getElementById('btnLeader').classList.toggle('active', role === 'Leader');
+  document.getElementById('btnFollower').classList.toggle('active', role === 'Follower');
+  renderAll();
+}
+
+function getFiltered() {
+  const divData = ALL_DATA[currentDiv];
+  if (!divData) return [];
+  let rows = divData[currentRole] || [];
+  const q = (document.getElementById('searchBox').value || '').toLowerCase();
+  if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q));
+  return rows;
+}
+
+function renderAll() {
+  const rows = getFiltered();
+  const divData = ALL_DATA[currentDiv] || {};
+  const allRows = divData[currentRole] || [];
+  const totalPts = allRows.reduce((s, r) => s + r.points, 0);
+  const maxPts = allRows.length ? Math.max(...allRows.map(r => r.points)) : 0;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="card stat-box" style="flex:1;min-width:100px">
+      <div class="stat-num" style="color:var(--blue)">${allRows.length}</div>
+      <div class="stat-lbl">танцоров с очками</div>
+    </div>
+    <div class="card stat-box" style="flex:1;min-width:100px">
+      <div class="stat-num">${totalPts}</div>
+      <div class="stat-lbl">сумма pts за ${YEAR}</div>
+    </div>
+    <div class="card stat-box" style="flex:1;min-width:100px">
+      <div class="stat-num">${maxPts}</div>
+      <div class="stat-lbl">максимум pts</div>
+    </div>
+  `;
+
+  const color = divData.color || '#4361ee';
+  const top = rows.slice(0, 40);
+  const ctx = document.getElementById('yearChart').getContext('2d');
+  if (yearChart) yearChart.destroy();
+  yearChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: top.map(r => r.name),
+      datasets: [{
+        data: top.map(r => r.points),
+        backgroundColor: color + 'dd',
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: {
+          label: c => ' ' + c.parsed.y + ' pts за ' + YEAR,
+        } } },
+      scales: {
+        x: { ticks: { color: '#8b949e', maxRotation: 45, font: {size: 10} },
+               grid: { color: '#21262d' } },
+        y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' },
+               beginAtZero: true },
+      },
+    },
+  });
+
+  let html = `<div style="overflow-x:auto"><table>
+    <thead><tr><th>#</th><th>Имя</th><th>WSDC ID</th><th>Очки за ${YEAR}</th><th>Ивентов</th></tr></thead><tbody>`;
+  rows.forEach((r, i) => {
+    html += `<tr>
+      <td style="color:var(--muted)">${i + 1}</td>
+      <td style="font-weight:600">${r.name}</td>
+      <td><a href="https://points.worldsdc.com/lookup2020?q=${r.wsdc_id}" target="_blank"
+             style="color:var(--muted);font-size:.8rem">${r.wsdc_id}</a></td>
+      <td class="pts">${r.points}</td>
+      <td style="color:var(--muted)">${r.events}</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  if (!rows.length) html = '<p style="color:var(--muted);padding:20px">Нет очков за этот год в выбранном дивизионе</p>';
+  document.getElementById('tableWrap').innerHTML = html;
+}
+</script>
+
+</div>
+</body>
+</html>

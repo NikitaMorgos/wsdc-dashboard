@@ -19,11 +19,14 @@ from __future__ import annotations
 import argparse
 import csv
 import os
+import random
 import sys
 import time
 from typing import Any, Dict, List, Optional
 
 import requests
+
+from wsdc_from_google_sheet import HEADERS, find_best_match, search_wsdc_dancer
 
 BASE = "https://danceconvention.net/eventdirector/rest"
 
@@ -40,6 +43,8 @@ DEFAULT_EVENTS: List[tuple[str, int]] = [
     ("Americano_Dance_Camp_2025", 300139570),
     ("SPb_WCS_Nights_2025", 300454680),
     ("Honey_Fest_2025", 300225910),
+    ("Honey_Fest_2026", 301107621),
+    ("Life_Is_Life_2026", 301330270),
 ]
 
 
@@ -117,6 +122,47 @@ def parse_results(results: List[Dict], tag: str, event_id: int, event_name: str,
     return rows
 
 
+def resolve_missing_wsdc_ids(rows: List[Dict[str, Any]], event_tags: Optional[List[str]] = None) -> int:
+    """Подставляет wsdc_id по имени для строк без affiliationNumber (Pro/Am и т.п.)."""
+    tags = set(event_tags or ["Life_Is_Life_2026"])
+    session = requests.Session()
+    session.headers.update(HEADERS)
+    name_to_id: Dict[str, str] = {}
+    names_needed = sorted(
+        {
+            (r.get("competitor_name") or "").strip()
+            for r in rows
+            if r.get("event_tag") in tags
+            and not (r.get("wsdc_id") or "").strip()
+            and (r.get("competitor_name") or "").strip()
+        }
+    )
+    for i, name in enumerate(names_needed, start=1):
+        try:
+            dancers = search_wsdc_dancer(name, session)
+            match = find_best_match(name, dancers) if dancers else None
+            if match and match.get("wsdc_id"):
+                name_to_id[name] = str(match["wsdc_id"])
+                print(
+                    f"  resolve [{i}/{len(names_needed)}] {name} -> {name_to_id[name]}",
+                    file=sys.stderr,
+                )
+        except Exception as e:
+            print(f"  resolve skip [{i}] ({e})", file=sys.stderr)
+        time.sleep(random.uniform(1.0, 2.0))
+
+    filled = 0
+    for r in rows:
+        if r.get("event_tag") not in tags or (r.get("wsdc_id") or "").strip():
+            continue
+        nm = (r.get("competitor_name") or "").strip()
+        wid = name_to_id.get(nm)
+        if wid:
+            r["wsdc_id"] = wid
+            filled += 1
+    return filled
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -158,7 +204,7 @@ def main() -> int:
         prelim_cnt = 0
 
         for c in comps:
-            if c.get("affiliationType") != "WSDC":
+            if c.get("affiliationType") != "WSDC" and tag != "Life_Is_Life_2026":
                 continue
             cid = c.get("contestId")
             cname = c.get("name") or ""
@@ -200,6 +246,16 @@ def main() -> int:
     if not rows:
         print("No rows — check event IDs or login.", file=sys.stderr)
         return 2
+
+    life_missing = sum(
+        1
+        for r in rows
+        if r.get("event_tag") == "Life_Is_Life_2026" and not (r.get("wsdc_id") or "").strip()
+    )
+    if life_missing:
+        print(f"Resolving wsdc_id for Life Is Life ({life_missing} rows)...", file=sys.stderr)
+        filled = resolve_missing_wsdc_ids(rows)
+        print(f"Resolved {filled} Life Is Life rows via WSDC name search", file=sys.stderr)
 
     fieldnames = list(rows[0].keys())
     with open(args.out, "w", newline="", encoding="utf-8-sig") as f:
