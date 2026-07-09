@@ -41,6 +41,7 @@ DEFAULT_EVENTS: List[tuple[str, int]] = [
     ("Moscow_Westie_Fest_Gala_2025", 300632160),
     ("Sea_Dance_Fest_2025", 300698151),
     ("Americano_Dance_Camp_2025", 300139570),
+    ("Americano_Dance_Camp_2026", 301108262),
     ("SPb_WCS_Nights_2025", 300454680),
     ("Honey_Fest_2025", 300225910),
     ("Honey_Fest_2026", 301107621),
