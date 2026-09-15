@@ -153,11 +153,77 @@ def infer_division_from_contest_name(contest_name: str) -> Optional[str]:
     return None
 
 
+def _main_ladder_div_at_index(idx: int) -> Optional[str]:
+    for div in DIVISION_ORDER:
+        if div in MAIN_LADDER_DIVISIONS and DIVISION_INDEX[div] == idx:
+            return div
+    return None
+
+
+def effective_main_ladder_row(main_rows: List[Dict]) -> Optional[Dict]:
+    """
+    Текущий дивизион на основной лестнице:
+    - нижние дивизионы с очками — история, если в реестре есть строка выше;
+    - на старшей строке реестра: если очков >= порога — переход в следующий дивизион;
+    - если в следующем дивизионе уже есть очки в реестре — берём их.
+    """
+    if not main_rows:
+        return None
+
+    by_div = {r["division"]: r for r in main_rows if r.get("division") in MAIN_LADDER_DIVISIONS}
+    if not by_div:
+        return max(main_rows, key=lambda r: DIVISION_INDEX.get(r["division"], -1))
+
+    max_idx = max(DIVISION_INDEX[d] for d in by_div)
+
+    def _synthetic(base: Dict, target_div: str) -> Dict:
+        if target_div in by_div:
+            return by_div[target_div]
+        return {
+            **base,
+            "division": target_div,
+            "abbr": "",
+            "points": 0,
+            "events": 0,
+            "first": base.get("last") or base.get("first", ""),
+            "last": base.get("last", ""),
+            "first_dt": base.get("last_dt") or base.get("first_dt"),
+            "last_dt": base.get("last_dt") or base.get("first_dt"),
+            "months": 0,
+            "speed": None,
+        }
+
+    for div in DIVISION_ORDER:
+        if div not in MAIN_LADDER_DIVISIONS:
+            continue
+        idx = DIVISION_INDEX[div]
+        if div not in by_div:
+            continue
+        if idx < max_idx:
+            continue
+
+        row = by_div[div]
+        thresh = THRESHOLDS.get(div)
+        if thresh is not None and row["points"] >= thresh:
+            next_idx = idx + 1
+            target_div = _main_ladder_div_at_index(next_idx) or "All-Stars"
+            return _synthetic(row, target_div)
+        return row
+
+    return max(by_div.values(), key=lambda r: (DIVISION_INDEX[r["division"]], r["points"]))
+
+
+def effective_main_ladder_index(main_rows: List[Dict]) -> int:
+    row = effective_main_ladder_row(main_rows)
+    if not row:
+        return -1
+    return DIVISION_INDEX.get(row.get("division") or "", -1)
+
+
 def build_rating_rows(div_rows: List[Dict]) -> List[Dict]:
     """
     Рейтинг «текущий дивизион» на основной лестнице:
-    - Ровно одна строка Newcomer…All-Stars — самый старший дивизион в реестре
-      (без раздувания историей Novice/Int, если человек уже выше).
+    - Ровно одна строка Newcomer…All-Stars с учётом порогов WSDC (Novice 16 → Intermediate и т.д.).
     - Sophisticated и Masters — отдельные треки: все строки Soph/Masters добавляются
       поверх (не заменяют основную лестницу).
     """
@@ -174,19 +240,16 @@ def build_rating_rows(div_rows: List[Dict]) -> List[Dict]:
         main_rows = [r for r in rows if r.get("division") in MAIN_LADDER_DIVISIONS]
         spl_rows = [r for r in rows if r.get("division") in SPECIAL_DIVISIONS]
 
-        if main_rows:
-            best = max(
-                main_rows,
-                key=lambda r: (DIVISION_INDEX.get(r["division"], -1), r["points"]),
-            )
-            out.append(best)
+        eff = effective_main_ladder_row(main_rows)
+        if eff:
+            out.append(eff)
         out.extend(spl_rows)
     return out
 
 
 def _max_main_ladder_index_by_pair(div_rows: List[Dict]) -> Dict[Tuple[str, str], int]:
-    """Максимальный индекс дивизиона на основной лестнице (по реестру), или -1 если нет."""
-    m: Dict[Tuple[str, str], int] = {}
+    """Эффективный дивизион на основной лестнице (реестр + пороги WSDC)."""
+    groups: Dict[Tuple[str, str], List[Dict]] = defaultdict(list)
     for r in div_rows:
         wid = (r.get("wsdc_id") or "").strip()
         if not wid:
@@ -195,10 +258,11 @@ def _max_main_ladder_index_by_pair(div_rows: List[Dict]) -> Dict[Tuple[str, str]
         div = r.get("division") or ""
         if div not in MAIN_LADDER_DIVISIONS:
             continue
-        idx = DIVISION_INDEX[div]
-        k = (wid, role)
-        if idx > m.get(k, -1):
-            m[k] = idx
+        groups[(wid, role)].append(r)
+
+    m: Dict[Tuple[str, str], int] = {}
+    for k, rows in groups.items():
+        m[k] = effective_main_ladder_index(rows)
     return m
 
 
@@ -209,8 +273,8 @@ def add_zero_point_rows_from_events(
 ) -> List[Dict]:
     """
     Добавляет строки с 0 очков по dc_wsdc_events_export, если пары (wsdc_id, role, division)
-    ещё нет в рейтинге. Не добавляет дивизион **ниже** уже зафиксированного в реестре
-    по основной лестнице (иначе Intermediate оказывался бы и в Novice из старого конкурса).
+    ещё нет в рейтинге. Для основной лестницы — только в **текущем** эффективном дивизионе
+    (не подмешивать Novice из DC, если танцор ещё Newcomer по реестру и порогам).
     """
     max_main = _max_main_ladder_index_by_pair(div_rows)
 
@@ -237,9 +301,9 @@ def add_zero_point_rows_from_events(
                 if not div or div not in DIVISION_INDEX:
                     continue
                 if div in MAIN_LADDER_DIVISIONS:
-                    hi = max_main.get((wid, role), -1)
+                    eff_hi = max_main.get((wid, role), -1)
                     lo = DIVISION_INDEX[div]
-                    if hi > lo:
+                    if lo != eff_hi:
                         continue
                 k = (wid, role, div)
                 if k in existing:
@@ -518,7 +582,7 @@ def build_rating_dashboard(div_rows: List[Dict]) -> str:
   <h1>🏅 Рейтинг танцоров по дивизионам</h1>
   <p>WSDC Points Registry · {today_str()}</p>
   <p style="max-width:720px;margin:10px auto 0;color:var(--muted);font-size:.9rem;line-height:1.45">
-    По основной лестнице (Newcomer → All-Stars) — <strong>одна</strong> строка на танцора: самый старший дивизион в реестре (без исторических Novice/Int).
+    По основной лестнице (Newcomer → All-Stars) — <strong>одна</strong> строка на танцора: текущий дивизион с учётом порогов WSDC (Novice 16 → Intermediate и т.д.).
     <strong>Sophisticated</strong> и <strong>Masters</strong> — дополнительно, отдельные вкладки. Участники с <strong>0</strong> очков — по конкурсам DC, если дивизион конкурса не ниже текущего в реестре.
   </p>
   <div class="meta">{RULES_SOURCE} · Источник: danceConvention + points.worldsdc.com</div>
