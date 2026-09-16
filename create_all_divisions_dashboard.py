@@ -654,6 +654,21 @@ function switchRole(role) {{
 
 let ratingChart = null;
 
+function ruFold(s) {{
+  const m = {{а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}};
+  return String(s || '').toLowerCase().replace(/[а-яё]/g, ch => m[ch] || ch);
+}}
+function nameMatches(name, q) {{
+  if (!q) return true;
+  const n = String(name || '').toLowerCase();
+  const qq = q.toLowerCase().trim();
+  if (n.includes(qq)) return true;
+  const folded = ruFold(qq);
+  if (folded && n.includes(folded)) return true;
+  const alt = folded.replace(/ya/g, 'ia').replace(/yu/g, 'iu');
+  return alt !== folded && n.includes(alt);
+}}
+
 function getFiltered() {{
   const divData = ALL_DATA[currentDiv];
   if (!divData) return [];
@@ -662,7 +677,7 @@ function getFiltered() {{
   const thresh = divData.threshold;
   if (onlyActive && thresh) rows = rows.filter(r => r.active);
   const q = (document.getElementById('searchBox').value || '').toLowerCase();
-  if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q));
+  if (q) rows = rows.filter(r => nameMatches(r.name, q));
   return rows;
 }}
 
@@ -1386,12 +1401,26 @@ function switchRole(role) {{
   renderAll();
 }}
 
+function ruFold(s) {{
+  const m = {{а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}};
+  return String(s || '').toLowerCase().replace(/[а-яё]/g, ch => m[ch] || ch);
+}}
+function nameMatches(name, q) {{
+  if (!q) return true;
+  const n = String(name || '').toLowerCase();
+  const qq = q.toLowerCase().trim();
+  if (n.includes(qq)) return true;
+  const folded = ruFold(qq);
+  if (folded && n.includes(folded)) return true;
+  const alt = folded.replace(/ya/g, 'ia').replace(/yu/g, 'iu');
+  return alt !== folded && n.includes(alt);
+}}
 function getFiltered() {{
   const divData = ALL_DATA[currentDiv];
   if (!divData) return [];
   let rows = divData[currentRole] || [];
   const q = (document.getElementById('searchBox').value || '').toLowerCase();
-  if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q));
+  if (q) rows = rows.filter(r => nameMatches(r.name, q));
   return rows;
 }}
 
