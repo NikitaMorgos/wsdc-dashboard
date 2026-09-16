@@ -601,7 +601,7 @@ def build_rating_dashboard(div_rows: List[Dict]) -> str:
       <input type="checkbox" id="chkActive" onchange="renderTable()" checked>
       Только активные (ниже порога)
     </label>
-    <input class="search-box" id="searchBox" placeholder="Поиск по имени…" oninput="renderTable()"
+    <input class="search-box" id="searchBox" placeholder="Поиск: бисовко, Дарья, Bisovko…" oninput="renderAll()"
            style="width:220px;margin:0;">
   </div>
 
@@ -658,26 +658,47 @@ function ruFold(s) {{
   const m = {{а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}};
   return String(s || '').toLowerCase().replace(/[а-яё]/g, ch => m[ch] || ch);
 }}
+function nameNorm(s) {{
+  return ruFold(s)
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/iya/g, 'ia')
+    .replace(/ya/g, 'ia')
+    .replace(/yu/g, 'iu')
+    .replace(/iy/g, 'i')
+    .replace(/\\s+/g, ' ')
+    .trim();
+}}
 function nameMatches(name, q) {{
   if (!q) return true;
   const n = String(name || '').toLowerCase();
   const qq = q.toLowerCase().trim();
   if (n.includes(qq)) return true;
-  const folded = ruFold(qq);
-  if (folded && n.includes(folded)) return true;
-  const alt = folded.replace(/ya/g, 'ia').replace(/yu/g, 'iu');
-  return alt !== folded && n.includes(alt);
+  const hay = ' ' + nameNorm(name) + ' ';
+  return nameNorm(q).split(' ').every(tok => tok && hay.includes(tok));
 }}
 
 function getFiltered() {{
+  const q = (document.getElementById('searchBox').value || '').trim();
+  const onlyActive = document.getElementById('chkActive').checked;
+  if (q) {{
+    const rows = [];
+    for (const [div, block] of Object.entries(ALL_DATA)) {{
+      for (const role of ['Leader', 'Follower']) {{
+        for (const r of block[role] || []) {{
+          if (nameMatches(r.name, q)) {{
+            rows.push(Object.assign({{}}, r, {{ division: div, role, threshold: block.threshold, color: block.color }}));
+          }}
+        }}
+      }}
+    }}
+    rows.sort((a, b) => (b.points || 0) - (a.points || 0) || String(a.name).localeCompare(String(b.name)));
+    return rows;
+  }}
   const divData = ALL_DATA[currentDiv];
   if (!divData) return [];
-  let rows = divData[currentRole] || [];
-  const onlyActive = document.getElementById('chkActive').checked;
+  let rows = (divData[currentRole] || []).map(r => Object.assign({{}}, r, {{ division: currentDiv, role: currentRole }}));
   const thresh = divData.threshold;
   if (onlyActive && thresh) rows = rows.filter(r => r.active);
-  const q = (document.getElementById('searchBox').value || '').toLowerCase();
-  if (q) rows = rows.filter(r => nameMatches(r.name, q));
   return rows;
 }}
 
@@ -765,37 +786,41 @@ function renderChart(rows) {{
 
 function renderTable(rows) {{
   if (!rows) rows = getFiltered();
+  const searching = !!(document.getElementById('searchBox').value || '').trim();
   const divData = ALL_DATA[currentDiv] || {{}};
-  const thresh = divData.threshold;
-  const color = divData.color || '#4361ee';
+  const defaultThresh = divData.threshold;
+  const defaultColor = divData.color || '#4361ee';
 
   let html = `<div style="overflow-x:auto;"><table>
     <thead><tr>
-      <th>#</th><th>Имя</th><th>WSDC ID</th><th>Очки</th>
-      ${{thresh ? '<th>Прогресс</th>' : ''}}
+      <th>#</th><th>Имя</th>${{searching ? '<th>Див.</th><th>Роль</th>' : ''}}<th>WSDC ID</th><th>Очки</th>
+      <th>Прогресс</th>
       <th>Ивентов</th><th>Первый</th><th>Последний</th>
     </tr></thead><tbody>`;
 
   rows.forEach((r, i) => {{
+    const thresh = r.threshold != null ? r.threshold : defaultThresh;
+    const color = r.color || defaultColor;
     const pct = thresh ? Math.min(r.points / thresh * 100, 100) : null;
-    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1);
-    const rowStyle = i < 3 ? 'background:rgba(255,255,255,.03)' : '';
-    html += `<tr style="${{rowStyle}}">
+    const rank = r.rank || (i + 1);
+    const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+    html += `<tr>
       <td><span style="font-weight:700">${{medal}}</span></td>
       <td style="font-weight:600">${{r.name}}</td>
+      ${{searching ? `<td style="color:var(--muted);font-size:.82rem">${{r.division || ''}}</td><td style="color:var(--muted);font-size:.82rem">${{r.role || ''}}</td>` : ''}}
       <td><a href="https://points.worldsdc.com/lookup2020?q=${{r.wsdc_id}}"
              target="_blank" style="color:var(--muted);font-size:.8rem">${{r.wsdc_id}}</a></td>
       <td class="pts">${{r.points}}</td>
-      ${{thresh ? `<td style="min-width:100px">
-        <div style="display:flex;align-items:center;gap:8px;">
+      <td style="min-width:100px">
+        ${{thresh ? `<div style="display:flex;align-items:center;gap:8px;">
           <div class="prog-wrap" style="flex:1">
             <div class="prog-bar" style="width:${{pct}}%;background:${{r.active ? color : '#2dc653'}}"></div>
           </div>
           <span style="font-size:.75rem;color:var(--muted);white-space:nowrap">
             ${{r.points}}/${{thresh}}
           </span>
-        </div>
-      </td>` : ''}}
+        </div>` : '—'}}
+      </td>
       <td style="color:var(--muted)">${{r.events}}</td>
       <td style="color:var(--muted);font-size:.82rem">${{r.first}}</td>
       <td style="color:var(--muted);font-size:.82rem">${{r.last}}</td>
@@ -1350,7 +1375,7 @@ def build_year_dynamics_dashboard(placements: List[Dict], year: int = CURRENT_YE
       <button class="role-btn" id="btnFollower" onclick="switchRole('Follower')">Follower</button>
     </div>
   </div>
-  <input class="search-box" id="searchBox" placeholder="Поиск по имени…" oninput="renderAll()"
+  <input class="search-box" id="searchBox" placeholder="Поиск: бисовко, Дарья, Bisovko…" oninput="renderAll()"
          style="max-width:280px;margin-bottom:16px;">
 
   <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;" id="statsRow"></div>
@@ -1405,27 +1430,47 @@ function ruFold(s) {{
   const m = {{а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}};
   return String(s || '').toLowerCase().replace(/[а-яё]/g, ch => m[ch] || ch);
 }}
+function nameNorm(s) {{
+  return ruFold(s)
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/iya/g, 'ia')
+    .replace(/ya/g, 'ia')
+    .replace(/yu/g, 'iu')
+    .replace(/iy/g, 'i')
+    .replace(/\\s+/g, ' ')
+    .trim();
+}}
 function nameMatches(name, q) {{
   if (!q) return true;
   const n = String(name || '').toLowerCase();
   const qq = q.toLowerCase().trim();
   if (n.includes(qq)) return true;
-  const folded = ruFold(qq);
-  if (folded && n.includes(folded)) return true;
-  const alt = folded.replace(/ya/g, 'ia').replace(/yu/g, 'iu');
-  return alt !== folded && n.includes(alt);
+  const hay = ' ' + nameNorm(name) + ' ';
+  return nameNorm(q).split(' ').every(tok => tok && hay.includes(tok));
 }}
 function getFiltered() {{
+  const q = (document.getElementById('searchBox').value || '').trim();
+  if (q) {{
+    const rows = [];
+    for (const [div, block] of Object.entries(ALL_DATA)) {{
+      for (const role of ['Leader', 'Follower']) {{
+        for (const r of block[role] || []) {{
+          if (nameMatches(r.name, q)) rows.push(Object.assign({{}}, r, {{ division: div, role }}));
+        }}
+      }}
+    }}
+    rows.sort((a, b) => (b.points || 0) - (a.points || 0) || String(a.name).localeCompare(String(b.name)));
+    return rows;
+  }}
   const divData = ALL_DATA[currentDiv];
   if (!divData) return [];
-  let rows = divData[currentRole] || [];
-  const q = (document.getElementById('searchBox').value || '').toLowerCase();
-  if (q) rows = rows.filter(r => nameMatches(r.name, q));
-  return rows;
+  return (divData[currentRole] || []).map(r => Object.assign({{}}, r, {{ division: currentDiv, role: currentRole }}));
 }}
 
 function renderAll() {{
   const rows = getFiltered();
+  const q = (document.getElementById('searchBox').value || '').trim();
+  const searching = !!q;
   const divData = ALL_DATA[currentDiv] || {{}};
   const allRows = divData[currentRole] || [];
   const totalPts = allRows.reduce((s, r) => s + r.points, 0);
@@ -1476,11 +1521,12 @@ function renderAll() {{
   }});
 
   let html = `<div style="overflow-x:auto"><table>
-    <thead><tr><th>#</th><th>Имя</th><th>WSDC ID</th><th>Очки за ${{YEAR}}</th><th>Ивентов</th></tr></thead><tbody>`;
+    <thead><tr><th>#</th><th>Имя</th>${{searching ? '<th>Див.</th><th>Роль</th>' : ''}}<th>WSDC ID</th><th>Очки за ${{YEAR}}</th><th>Ивентов</th></tr></thead><tbody>`;
   rows.forEach((r, i) => {{
     html += `<tr>
-      <td style="color:var(--muted)">${{i + 1}}</td>
+      <td style="color:var(--muted)">${{r.rank || (i + 1)}}</td>
       <td style="font-weight:600">${{r.name}}</td>
+      ${{searching ? `<td style="color:var(--muted);font-size:.82rem">${{r.division || ''}}</td><td style="color:var(--muted);font-size:.82rem">${{r.role || ''}}</td>` : ''}}
       <td><a href="https://points.worldsdc.com/lookup2020?q=${{r.wsdc_id}}" target="_blank"
              style="color:var(--muted);font-size:.8rem">${{r.wsdc_id}}</a></td>
       <td class="pts">${{r.points}}</td>
